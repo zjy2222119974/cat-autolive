@@ -1,0 +1,120 @@
+{
+    "鲜花": {
+        "name": "鲜花",
+        "price": 0.1,
+        "type": "command_token",
+        "actions": [
+            {
+                "command": "#冻干",
+                "action": "feed_freeze",
+                "device": "feeder_freeze_dried"
+            },
+            {
+                "command": "#猫条",
+                "action": "feed_snack",
+                "device": "feeder_paste"
+            },
+            {
+                "command": "#膏膏",
+                "action": "feed_nutritional_paste",
+                "device": "feeder_paste"
+            }
+        ],
+        "description": "获得一次发送 #冻干/#猫条/#膏膏 的机会"
+    },
+    "人气票": {
+        "name": "人气票",
+        "price": 0.1,
+        "type": "direct_trigger",
+        "action": "feed_dry_food",
+        "device": "feeder_kibble",
+        "description": "投喂猫粮"
+    },
+    "爱的纸鹤": {
+        "name": "爱的纸鹤",
+        "price": 99.0,
+        "type": "duration_event",
+        "action": "feed_canned_food",
+        "device": "feeder_canned",
+        "duration": 60,
+        "description": "猫罐头爽吃1分钟"
+    },
+    "亲吻": {
+        "name": "亲吻",
+        "price": 9.9,
+        "type": "vehicle_time",
+        "device": "car_hakimi",
+        "duration": 300,
+        "allowed_commands": [
+            "#w",
+            "#a",
+            "#s",
+            "#d",
+            "#r"
+        ],
+        "description": "哈基米车5分钟"
+    },
+    "比心": {
+        "name": "比心",
+        "price": 19.9,
+        "type": "vehicle_time",
+        "device": "car_hakimi",
+        "duration": 720,
+        "allowed_commands": [
+            "#w",
+            "#a",
+            "#s",
+            "#d",
+            "#r"
+        ],
+        "description": "哈基米车12分钟"
+    },
+    "真爱玫瑰": {
+        "name": "真爱玫瑰",
+        "price": 52.0,
+        "type": "vehicle_time",
+        "device": "car_hakimi",
+        "duration": 1800,
+        "allowed_commands": [
+            "#w",
+            "#a",
+            "#s",
+            "#d",
+            "#r"
+        ],
+        "description": "哈基米车30分钟"
+    },
+    "关注": {
+        "name": "关注",
+        "price": 0,
+        "type": "duration_event",
+        "action": "start_laser_ball",
+        "device": "laser_ball",
+        "duration": 5,
+        "description": "激光雨5秒"
+    },
+    "粉丝灯牌": {
+        "name": "粉丝灯牌",
+        "price": 0.1,
+        "type": "duration_event",
+        "action": "start_laser_ball",
+        "device": "laser_ball",
+        "duration": 10,
+        "description": "激光雨10秒"
+    },
+    "掌上明珠": {
+        "name": "掌上明珠",
+        "price": 88.8,
+        "type": "vip_pass",
+        "device": "all",
+        "duration": 900,
+        "allowed_commands": "all",
+        "vip_features": {
+            "laser_ball_continuous": true,
+            "car_hakimi_exclusive": true,
+            "other_devices_once": true,
+            "queue_priority": true
+        },
+        "description": "VIP包场15分钟：激光雨持续运行+哈基米车专属+其他设备各玩一次"
+    }
+}

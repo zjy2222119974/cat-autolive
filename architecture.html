@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直播互动硬件系统架构图</title>
+    <!-- 使用较新的 Mermaid 版本以支持更好的渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 95%;
+            max-width: 1200px;
+            overflow-x: auto;
+        }
+        .legend {
+            margin-top: 20px;
+            font-size: 0.9em;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            max-width: 800px;
+        }
+        .legend h3 { margin-top: 0; }
+        .legend ul { list-style-type: none; padding: 0; }
+        .legend li { margin-bottom: 8px; }
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+        .py { background-color: #3572A5; } /* Python Blue */
+        .cpp { background-color: #f34b7d; } /* C++ Red */
+        .mpy { background-color: #f9c440; color: black; } /* MicroPython Yellow */
+    </style>
+</head>
+<body>
+
+    <h1>直播互动硬件控制系统 - 优化架构</h1>
+    <p>基于分层设计 (Layered Architecture) 与 混合语言技术栈</p>
+
+    <div class="container">
+        <div class="mermaid">
+            %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcc00', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#fff'}}}%%
+            graph TD
+            
+            %% 定义样式类 (移除分号)
+            classDef perception fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+            classDef core fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+            classDef driver fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+            classDef hardware fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+            classDef external fill:#eeeeee,stroke:#999,stroke-dasharray: 5 5
+
+            %% --- 第一层：感知与交互层 ---
+            subgraph L1 ["第一层：感知与交互层 (Python)"]
+                direction TB
+                User(直播间观众) -->|弹幕/礼物| Listener["弹幕监听器<br/>(Bilibili API/抓包)"]
+                Admin(管理员/键盘) -->|手动优先指令| Listener
+                
+                AI_Avatar["AI 数字人交互<br/>(TTS/表情控制)"]
+                Stream_Mixer["视频流合成中心<br/>(OpenCV/OBS接口)"]
+            end
+
+            %% --- 第二层：大脑中枢层 ---
+            subgraph L2 ["第二层：大脑中枢层 (Python)"]
+                direction TB
+                Cmd_Queue["指令队列系统<br/>FIFO + 优先级"]
+                Cooldown["冷却 & 频率限制"]
+                State_Mgr["状态管理器<br/>(设备忙碌/空闲判定)"]
+                Error_Handler["异常处理 & 自愈中心"]
+            end
+
+            %% --- 第三层：驱动适配层 ---
+            subgraph L3 ["第三层：驱动适配层 (Python)"]
+                direction TB
+                Wifi_Driver["WiFi 设备驱动器<br/>(HTTP Requests / Socket)"]
+                ADB_Driver["安卓模拟器驱动器<br/>(ADB Shell Commands)"]
+            end
+
+            %% --- 第四层：硬件执行层 ---
+            subgraph L4 ["第四层：物理硬件与模拟环境"]
+                direction TB
+                
+                subgraph Self_Hardware ["自研硬件组"]
+                    ESP32_Cam["ESP32 视频小车<br/>(C++ / Arduino)"]
+                    ESP32_Toy["ESP32 逗猫棒/云台<br/>(MicroPython)"]
+                end
+
+                subgraph Brand_Hardware ["品牌硬件组"]
+                    Emulator["安卓模拟器<br/>(运行品牌App)"]
+                    Real_Feeder("品牌喂食器/猫砂盆"):::external
+                end
+            end
+
+            %% --- 连接关系 ---
+            
+            %% 1. 数据流入中枢
+            Listener --> Cmd_Queue
+            Cmd_Queue --> Cooldown
+            Cooldown --> State_Mgr
+
+            %% 2. 中枢分发指令
+            State_Mgr -- "小车/云台指令" --> Wifi_Driver
+            State_Mgr -- "点击App坐标" --> ADB_Driver
+
+            %% 3. 驱动控制硬件
+            Wifi_Driver -->|HTTP GET / TCP| ESP32_Cam
+            Wifi_Driver -->|Socket / MQTT| ESP32_Toy
+            ADB_Driver -->|adb shell input tap| Emulator
+            Emulator -.->|蓝牙/WiFi| Real_Feeder
+
+            %% 4. 视频流回传
+            ESP32_Cam -.->|MJPEG 视频流| Stream_Mixer
+            Emulator -.->|窗口画面捕获| Stream_Mixer
+            Stream_Mixer -->|推流| User
+
+            %% 5. 异常反馈闭环
+            Wifi_Driver -- "连接超时" --> Error_Handler
+            ADB_Driver -- "App崩溃/元素未找到" --> Error_Handler
+            Error_Handler -->|重启驱动/清空队列| State_Mgr
+            Error_Handler -->|触发语音播报| AI_Avatar
+
+            %% 应用样式 (移除分号)
+            class Listener,AI_Avatar,Stream_Mixer perception
+            class Cmd_Queue,Cooldown,State_Mgr,Error_Handler core
+            class Wifi_Driver,ADB_Driver driver
+            class ESP32_Cam,ESP32_Toy,Emulator hardware
+
+        </div>
+    </div>
+
+    <div class="legend">
+        <h3>架构设计说明：</h3>
+        <ul>
+            <li><span class="tag py">Python</span> <b>蓝色区域 (L1-L3)：</b> 运行在电脑上的上位机程序。负责逻辑处理、网络请求和模拟器控制。这是你的核心开发工作。</li>
+            <li><span class="tag cpp">C++</span> <b>ESP32 视频小车：</b> 由于需要处理高帧率视频流，建议使用 Arduino C++ 框架编写，保证推流流畅。</li>
+            <li><span class="tag mpy">MicroPython</span> <b>简单外设：</b> 如逗猫棒或云台，逻辑简单，使用 MicroPython 开发效率最高。</li>
+            <li><b>异常自愈闭环：</b> 注意红色的"异常处理"模块，它不仅记录错误，还能指挥 AI 说话（"哎呀，小车断线了，正在重连"），并尝试重启驱动。</li>
+        </ul>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+</html>

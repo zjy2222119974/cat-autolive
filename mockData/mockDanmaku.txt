@@ -1,0 +1,422 @@
+[
+  {
+    "offset_sec": 0.5,
+    "user": "系统消息",
+    "type": "system",
+    "content": "直播间连接成功，互动玩法已加载..."
+  },
+  {
+    "offset_sec": 1.0,
+    "user": "吃瓜群众A",
+    "type": "chat",
+    "content": "前排！这就是传说中的互动小车吗？"
+  },
+  {
+    "offset_sec": 3.0,
+    "user": "系统消息",
+    "type": "system",
+    "content": ""
+  },
+  {
+    "offset_sec": 4.5,
+    "user": "操作怪",
+    "type": "chat",
+    "content": "#w3"
+  },
+  {
+    "offset_sec": 6.0,
+    "user": "新粉小王",
+    "type": "chat",
+    "content": "这车怎么不动啊？是要排队吗？"
+  },
+  {
+    "offset_sec": 8.0,
+    "user": "榜一大哥",
+    "type": "gift",
+    "gift_name": "亲吻",
+    "count": 1,
+    "content": "送出了 亲吻 x1"
+  },
+  {
+    "offset_sec": 8.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "感谢大哥的亲吻！哈基米车已就位，时长5分钟，准备出发！"
+  },
+  {
+    "offset_sec": 10.0,
+    "user": "榜一大哥",
+    "type": "chat",
+    "content": "#a2"
+  },
+  {
+    "offset_sec": 12.0,
+    "user": "榜一大哥",
+    "type": "chat",
+    "content": "#w5d2"
+  },
+  {
+    "offset_sec": 14.0,
+    "user": "路人乙",
+    "type": "chat",
+    "content": "前面的别撞墙啊哈哈哈"
+  },
+  {
+    "offset_sec": 16.0,
+    "user": "猫奴一号",
+    "type": "gift",
+    "gift_name": "人气票",
+    "count": 1,
+    "content": "送出了 人气票 x1"
+  },
+  {
+    "offset_sec": 16.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "检测到【人气票】！正在启动喂食器..."
+  },
+  {
+    "offset_sec": 18.0,
+    "user": "爱猫人士",
+    "type": "chat",
+    "content": "真的出粮了吗？想看特写！"
+  },
+  {
+    "offset_sec": 20.0,
+    "user": "气氛组",
+    "type": "gift",
+    "gift_name": "鲜花",
+    "count": 1,
+    "content": "送出了 鲜花 x1"
+  },
+  {
+    "offset_sec": 20.2,
+    "user": "气氛组",
+    "type": "chat",
+    "content": "#冻干"
+  },
+  {
+    "offset_sec": 20.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "冻干已投喂！"
+  },
+  {
+    "offset_sec": 22.0,
+    "user": "捣乱分子",
+    "type": "chat",
+    "content": "#s5"
+  },
+  {
+    "offset_sec": 24.0,
+    "user": "精准操控",
+    "type": "gift",
+    "gift_name": "爱的纸鹤",
+    "count": 1,
+    "content": "送出了 爱的纸鹤 x1"
+  },
+  {
+    "offset_sec": 24.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "猫罐已打开，小猫可爽吃1分钟"
+  },
+  {
+    "offset_sec": 26.0,
+    "user": "精准操控",
+    "type": "chat",
+    "content": "#left_scan"
+  },
+  {
+    "offset_sec": 28.0,
+    "user": "吃瓜群众B",
+    "type": "chat",
+    "content": "这猫看起来不太聪明的样子"
+  },
+  {
+    "offset_sec": 30.0,
+    "user": "土豪",
+    "type": "gift",
+    "gift_name": "掌上明珠",
+    "count": 1,
+    "content": "送出了 掌上明珠 x1"
+  },
+  {
+    "offset_sec": 30.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "哇！感谢土豪送出的【掌上明珠】！获得插队+全场项目畅玩一次，下一位就是你！"
+  },
+  {
+    "offset_sec": 31.0,
+    "user": "土豪",
+    "type": "chat",
+    "count": 1,
+    "content": "#s5"
+  },
+  {
+    "offset_sec": 31.2,
+    "user": "土豪",
+    "type": "chat",
+    "count": 1,
+    "content": "#膏膏"
+  },
+  {
+    "offset_sec": 32.0,
+    "user": "路人丙",
+    "type": "chat",
+    "content": "66666 闪瞎了"
+  },
+  {
+    "offset_sec": 34.0,
+    "user": "密集指令A",
+    "type": "chat",
+    "content": "#w1"
+  },
+  {
+    "offset_sec": 34.2,
+    "user": "密集指令B",
+    "type": "chat",
+    "content": "#a1"
+  },
+  {
+    "offset_sec": 35.0,
+    "user": "颜值粉",
+    "type": "gift",
+    "gift_name": "关注",
+    "count": 1,
+    "content": "送出了 关注"
+  },
+  {
+    "offset_sec": 35.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "欢迎新粉丝关注！激光雨已启动，持续5秒"
+  },
+  {
+    "offset_sec": 37.0,
+    "user": "新晋粉丝",
+    "type": "gift",
+    "gift_name": "粉丝灯牌",
+    "count": 1,
+    "content": "送出了 粉丝灯牌 x1"
+  },
+  {
+    "offset_sec": 37.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "感谢点亮灯牌！激光雨加时10秒！"
+  },
+  {
+    "offset_sec": 39.0,
+    "user": "小白用户",
+    "type": "chat",
+    "content": "激光雨是什么？"
+  },
+  {
+    "offset_sec": 40.5,
+    "user": "老粉解答",
+    "type": "chat",
+    "content": "就是激光逗猫球，可以看到猫咪追光点玩"
+  },
+  {
+    "offset_sec": 42.0,
+    "user": "猫条爱好者",
+    "type": "gift",
+    "gift_name": "鲜花",
+    "count": 1,
+    "content": "送出了 鲜花 x1"
+  },
+  {
+    "offset_sec": 42.3,
+    "user": "猫条爱好者",
+    "type": "chat",
+    "content": "#猫条"
+  },
+  {
+    "offset_sec": 42.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "猫条已投喂！小猫吃得好开心~"
+  },
+  {
+    "offset_sec": 44.0,
+    "user": "壕无人性",
+    "type": "gift",
+    "gift_name": "比心",
+    "count": 1,
+    "content": "送出了 比心 x1"
+  },
+  {
+    "offset_sec": 44.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "哇！比心礼物！哈基米车12分钟驾驶权已送达！"
+  },
+  {
+    "offset_sec": 45.0,
+    "user": "壕无人性",
+    "type": "chat",
+    "content": "#w3d3"
+  },
+  {
+    "offset_sec": 47.0,
+    "user": "围观群众",
+    "type": "chat",
+    "content": "这操作太秀了吧"
+  },
+  {
+    "offset_sec": 49.0,
+    "user": "超级大佬",
+    "type": "gift",
+    "gift_name": "真爱玫瑰",
+    "count": 1,
+    "content": "送出了 真爱玫瑰 x1"
+  },
+  {
+    "offset_sec": 49.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "天啊！真爱玫瑰！哈基米车30分钟超长驾驶权！感谢超级大佬！"
+  },
+  {
+    "offset_sec": 50.5,
+    "user": "路人路过",
+    "type": "chat",
+    "content": "有钱人的快乐我想象不到"
+  },
+  {
+    "offset_sec": 52.0,
+    "user": "多多益善",
+    "type": "gift",
+    "gift_name": "人气票",
+    "count": 5,
+    "content": "送出了 人气票 x5"
+  },
+  {
+    "offset_sec": 52.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "检测到【人气票x5】！猫粮投喂队列中..."
+  },
+  {
+    "offset_sec": 54.0,
+    "user": "营养担当",
+    "type": "gift",
+    "gift_name": "鲜花",
+    "count": 1,
+    "content": "送出了 鲜花 x1"
+  },
+  {
+    "offset_sec": 54.2,
+    "user": "营养担当",
+    "type": "chat",
+    "content": "#膏膏"
+  },
+  {
+    "offset_sec": 54.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "营养膏已投喂！健康成长！"
+  },
+  {
+    "offset_sec": 56.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a5w3"
+  },
+  {
+    "offset_sec": 58.0,
+    "user": "弹幕机A",
+    "type": "chat",
+    "content": "左边左边！"
+  },
+  {
+    "offset_sec": 58.5,
+    "user": "弹幕机B",
+    "type": "chat",
+    "content": "后退后退！"
+  },
+  {
+    "offset_sec": 62.0,
+    "user": "神豪大佬",
+    "type": "gift",
+    "gift_name": "掌上明珠",
+    "count": 1,
+    "content": "送出了 掌上明珠 x1"
+  },
+  {
+    "offset_sec": 62.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "🎉🎉🎉 天降壕礼！神豪大佬送出【掌上明珠】！全场包场15分钟开始！激光雨持续运行，哈基米车专属控制！"
+  },
+  {
+    "offset_sec": 64.0,
+    "user": "路人观众",
+    "type": "chat",
+    "content": "卧槽！88块！真有钱啊"
+  },
+  {
+    "offset_sec": 65.0,
+    "user": "神豪大佬",
+    "type": "chat",
+    "content": "#冻干"
+  },
+  {
+    "offset_sec": 67.0,
+    "user": "神豪大佬",
+    "type": "chat",
+    "content": "#猫条"
+  },
+  {
+    "offset_sec": 69.0,
+    "user": "神豪大佬",
+    "type": "chat",
+    "content": "#w5"
+  },
+  {
+    "offset_sec": 71.0,
+    "user": "神豪大佬",
+    "type": "chat",
+    "content": "#d3"
+  },
+  {
+    "offset_sec": 73.0,
+    "user": "普通用户",
+    "type": "gift",
+    "gift_name": "鲜花",
+    "count": 1,
+    "content": "送出了 鲜花 x1"
+  },
+  {
+    "offset_sec": 73.5,
+    "user": "普通用户",
+    "type": "chat",
+    "content": "#膏膏"
+  },
+  {
+    "offset_sec": 74.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "VIP包场中，其他用户指令排队等待..."
+  },
+  {
+    "offset_sec": 75.0,
+    "user": "神豪大佬",
+    "type": "chat",
+    "content": "#a2w3"
+  },
+  {
+    "offset_sec": 77.0,
+    "user": "吃瓜群众",
+    "type": "chat",
+    "content": "大哥操作太秀了！"
+  },
+  {
+    "offset_sec": 80.0,
+    "user": "系统消息",
+    "type": "system",
+    "content": "模拟结束。"
+  }
+]

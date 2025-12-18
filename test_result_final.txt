@@ -1,0 +1,22 @@
+test_command_queue_priority (test_core.TestCoreModules.test_command_queue_priority)
+测试指令队列优先级 ... ok
+test_cooldown (test_core.TestCoreModules.test_cooldown)
+测试冷却机制 ... ok
+test_dispatcher_flow (test_core.TestCoreModules.test_dispatcher_flow)
+测试分发器完整流程 ... FAIL
+test_state_manager (test_core.TestCoreModules.test_state_manager)
+测试状态管理 ... ok
+
+======================================================================
+FAIL: test_dispatcher_flow (test_core.TestCoreModules.test_dispatcher_flow)
+测试分发器完整流程
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\CODE\cat-autolive\test_core.py", line 121, in test_dispatcher_flow
+    self.assertEqual(dispatcher.error_handler._error_counts.get("mock", 0), 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.462s
+
+FAILED (failures=1)
