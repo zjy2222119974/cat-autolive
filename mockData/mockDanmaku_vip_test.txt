@@ -1,0 +1,170 @@
+[
+  {
+    "offset_sec": 0.5,
+    "user": "系统消息",
+    "type": "system",
+    "content": "🎥 直播间连接成功，VIP插队测试场景"
+  },
+  {
+    "offset_sec": 2.0,
+    "user": "超级大佬",
+    "type": "gift",
+    "gift_name": "掌上明珠",
+    "count": 1,
+    "content": "送出了 掌上明珠 x1"
+  },
+  {
+    "offset_sec": 2.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "🎉 VIP包场激活！"
+  },
+  {
+    "offset_sec": 3.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5"
+  },
+  {
+    "offset_sec": 5.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#冻干"
+  },
+  {
+    "offset_sec": 6.0,
+    "user": "普通用户A",
+    "type": "gift",
+    "gift_name": "人气票",
+    "count": 1,
+    "content": "送出了 人气票 x1"
+  },
+  {
+    "offset_sec": 6.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⚠️ 测试：普通用户刷了人气票（猫粮），看是否能插队"
+  },
+  {
+    "offset_sec": 10.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a3"
+  },
+  {
+    "offset_sec": 12.0,
+    "user": "普通用户B",
+    "type": "gift",
+    "gift_name": "鲜花",
+    "count": 1,
+    "content": "送出了 鲜花 x1"
+  },
+  {
+    "offset_sec": 12.5,
+    "user": "普通用户B",
+    "type": "chat",
+    "content": "#猫条"
+  },
+  {
+    "offset_sec": 13.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⚠️ 测试：普通用户用令牌发送猫条指令，看是否能插队"
+  },
+  {
+    "offset_sec": 15.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d4"
+  },
+  {
+    "offset_sec": 18.0,
+    "user": "普通用户C",
+    "type": "gift",
+    "gift_name": "爱的纸鹤",
+    "count": 1,
+    "content": "送出了 爱的纸鹤 x1"
+  },
+  {
+    "offset_sec": 18.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⚠️ 测试：普通用户刷了爱的纸鹤99元（猫罐头1分钟），看是否能插队"
+  },
+  {
+    "offset_sec": 20.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w3"
+  },
+  {
+    "offset_sec": 22.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#猫条"
+  },
+  {
+    "offset_sec": 25.0,
+    "user": "普通用户D",
+    "type": "gift",
+    "gift_name": "亲吻",
+    "count": 1,
+    "content": "送出了 亲吻 x1"
+  },
+  {
+    "offset_sec": 25.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⚠️ 测试：普通用户刷了亲吻9.9元（哈基米车5分钟），看是否能插队"
+  },
+  {
+    "offset_sec": 26.0,
+    "user": "普通用户D",
+    "type": "chat",
+    "content": "#a2"
+  },
+  {
+    "offset_sec": 28.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s2"
+  },
+  {
+    "offset_sec": 30.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#膏膏"
+  },
+  {
+    "offset_sec": 32.0,
+    "user": "普通用户E",
+    "type": "gift",
+    "gift_name": "粉丝灯牌",
+    "count": 1,
+    "content": "送出了 粉丝灯牌 x1"
+  },
+  {
+    "offset_sec": 32.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⚠️ 测试：普通用户点了粉丝灯牌（激光雨10秒），这个应该可以，因为激光球VIP期间一直在运行"
+  },
+  {
+    "offset_sec": 35.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5a3d2"
+  },
+  {
+    "offset_sec": 40.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s3w2"
+  },
+  {
+    "offset_sec": 45.0,
+    "user": "系统消息",
+    "type": "system",
+    "content": "📊 测试结束，请查看日志分析结果"
+  }
+]

@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (
     QStackedWidget
 )
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtGui import QAction, QIcon, QActionGroup
+import os
 
 from src.utils.logger import get_logger
 from src.ui.pages.hub_page import HubPage
@@ -26,6 +27,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.dispatcher = dispatcher
         self.logger = get_logger()
+        self.current_mock_file = "mockData/mockDanmaku.txt"  # 默认弹幕文件
         self.logger.info("初始化主窗口")
         
         self._init_ui(width, height)
@@ -165,6 +167,10 @@ class MainWindow(QMainWindow):
         
         for page in self.pages:
             self.content_stack.addWidget(page)
+        
+        # 设置 HubPage 的初始弹幕文件
+        if len(self.pages) > 0:
+            self.pages[0].set_mock_file(self.current_mock_file)
     
     def _create_menu_bar(self):
         """创建菜单栏"""
@@ -174,10 +180,14 @@ class MainWindow(QMainWindow):
         menu_action = menubar.addMenu("菜单")
         settings_action = menubar.addMenu("设置")
         
-        # 填充菜单项 (示例)
+        # 填充菜单项
         exit_action = QAction("退出", self)
         exit_action.triggered.connect(self.close)
         menu_action.addAction(exit_action)
+        
+        # 测试弹幕子菜单
+        mock_menu = menu_action.addMenu("测试弹幕")
+        self._create_mock_file_menu(mock_menu)
         
         # 设置菜单项
         gift_config_action = QAction("配置节目单", self)
@@ -186,6 +196,71 @@ class MainWindow(QMainWindow):
         
         pref_action = QAction("首选项", self)
         settings_action.addAction(pref_action)
+    
+    def _create_mock_file_menu(self, menu: QMenu):
+        """创建测试弹幕子菜单"""
+        mock_dir = "mockData"
+        
+        # 检查目录是否存在
+        if not os.path.exists(mock_dir):
+            no_files_action = QAction("未找到测试文件", self)
+            no_files_action.setEnabled(False)
+            menu.addAction(no_files_action)
+            return
+        
+        # 扫描 mockData 目录下的所有 .txt 文件
+        mock_files = []
+        try:
+            for file in os.listdir(mock_dir):
+                if file.endswith(".txt"):
+                    mock_files.append(os.path.join(mock_dir, file))
+        except Exception as e:
+            self.logger.error(f"扫描测试弹幕文件失败: {e}")
+            return
+        
+        if not mock_files:
+            no_files_action = QAction("未找到测试文件", self)
+            no_files_action.setEnabled(False)
+            menu.addAction(no_files_action)
+            return
+        
+        # 对文件名排序
+        mock_files.sort()
+        
+        # 创建动作组（用于单选）
+        action_group = QActionGroup(self)
+        action_group.setExclusive(True)
+        
+        # 为每个文件创建菜单项
+        for file_path in mock_files:
+            file_name = os.path.basename(file_path)
+            action = QAction(file_name, self)
+            action.setCheckable(True)
+            
+            # 设置默认选中项
+            if file_path == self.current_mock_file:
+                action.setChecked(True)
+            
+            # 连接选择事件
+            action.triggered.connect(lambda checked, path=file_path: self._on_mock_file_selected(path))
+            
+            action_group.addAction(action)
+            menu.addAction(action)
+        
+        self.logger.info(f"加载了 {len(mock_files)} 个测试弹幕文件")
+    
+    def _on_mock_file_selected(self, file_path: str):
+        """选择测试弹幕文件"""
+        self.current_mock_file = file_path
+        file_name = os.path.basename(file_path)
+        self.logger.info(f"已选择测试弹幕文件: {file_name}")
+        self.statusBar().showMessage(f"当前测试弹幕: {file_name}")
+        
+        # 如果 HubPage 已经初始化，更新其弹幕文件
+        if hasattr(self, 'pages') and len(self.pages) > 0:
+            hub_page = self.pages[0]  # HubPage 是第一个页面
+            if hasattr(hub_page, 'set_mock_file'):
+                hub_page.set_mock_file(file_path)
     
     def _create_status_bar(self):
         """创建状态栏"""

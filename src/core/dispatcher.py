@@ -39,6 +39,9 @@ class Dispatcher:
         self.vip_user: Optional[str] = None           # 当前VIP用户
         self.vip_expiry: float = 0                     # VIP到期时间戳
         self.vip_used_devices: set = set()             # VIP已使用过的设备（单次限制）
+        self.vip_waiting: bool = False                 # VIP是否在等待设备释放
+        self.vip_waiting_start: float = 0              # VIP等待开始时间
+        self.vip_saved_queues: Dict[str, list] = {}    # VIP激活时保存的队列
         
         # 加载礼物配置
         self.gift_config = self._load_gift_config()
@@ -190,13 +193,18 @@ class Dispatcher:
         if g_type == 'command_token':
             # 授予令牌
             actions = config.get('actions', [])
-            # 简化：存储允许的指令列表
             allowed_cmds = [act['command'] for act in actions]
-            # 将这些指令添加到用户的令牌池
-            # 这里简单实现：添加一个 grant，包含所有允许的指令
+            
+            # VIP期间检查（非等待状态）
+            if self.vip_user and not self.vip_waiting:
+                if user != self.vip_user:
+                    # 非VIP用户在VIP期间刷令牌礼物，被阻塞
+                    self.logger.info(f"🚫 VIP包场中，用户[{user}]的礼物[{gift_name}]被阻塞")
+                    return
+            
             self.user_permissions[user]["tokens"].append({
                 "cmds": allowed_cmds,
-                "config": actions # 存储完整配置以便查找 device
+                "config": actions
             })
             self.logger.info(f"用户[{user}] 获得令牌: {allowed_cmds}")
             
@@ -204,6 +212,14 @@ class Dispatcher:
             # 增加驾驶时间
             duration = config.get('duration', 0)
             now = time.time()
+            
+            # VIP期间检查（非等待状态）
+            if self.vip_user and not self.vip_waiting:
+                if user != self.vip_user:
+                    # 非VIP用户在VIP期间刷车辆礼物，被阻塞
+                    self.logger.info(f"🚫 VIP包场中，用户[{user}]的礼物[{gift_name}]被阻塞，哈基米车为VIP专属")
+                    return
+            
             current_expiry = max(now, self.user_permissions[user]["vehicle_expiry"])
             self.user_permissions[user]["vehicle_expiry"] = current_expiry + duration
             self.logger.info(f"用户[{user}] 获得驾驶时间 {duration}s")
@@ -213,6 +229,13 @@ class Dispatcher:
             device = config.get('device')
             action = config.get('action')
             duration = config.get('duration', 0)
+            
+            # VIP期间检查（非等待状态）
+            if self.vip_user and not self.vip_waiting:
+                if user != self.vip_user and device != "laser_ball":
+                    # 非VIP用户在VIP期间刷礼物，被阻塞（激光球除外）
+                    self.logger.info(f"🚫 VIP包场中，用户[{user}]的礼物[{gift_name}]被阻塞，设备[{device}]为VIP专属")
+                    return
             
             if device:
                 cmd = Command(
@@ -232,12 +255,60 @@ class Dispatcher:
         """激活VIP包场模式"""
         duration = config.get('duration', 900)  # 默认15分钟
         
+        # 检查5个设备（除了激光球）是否有正在运行的
+        non_laser_devices = [name for name in self.device_busy_until.keys() if name != "laser_ball"]
+        busy_devices = []
+        now = time.time()
+        
+        for device_name in non_laser_devices:
+            if now < self.device_busy_until.get(device_name, 0):
+                busy_devices.append(device_name)
+                remaining = self.device_busy_until[device_name] - now
+                self.logger.info(f"[VIP等待] 设备 [{device_name}] 还在运行，剩余 {remaining:.1f}秒")
+        
         # 设置VIP状态
         self.vip_user = user
         self.vip_expiry = time.time() + duration
         self.vip_used_devices.clear()  # 清空已使用设备记录
         
-        self.logger.info(f"🎉 VIP包场开始: 用户[{user}], 持续{duration}秒")
+        if busy_devices:
+            # 有设备在运行，进入等待模式
+            self.vip_waiting = True
+            self.vip_waiting_start = time.time()
+            self.logger.info(f"⏳ VIP包场激活: 用户[{user}]需要等待设备释放...")
+            self.logger.info(f"[VIP等待] 正在等待设备: {', '.join(busy_devices)}")
+            
+            # 保存所有设备的当前队列（除了激光球）
+            self._save_queues_for_vip()
+        else:
+            # 没有设备在运行，直接开始VIP
+            self.vip_waiting = False
+            self.logger.info(f"🎉 VIP包场立即开始: 用户[{user}], 持续{duration}秒")
+            self._start_vip_session(user, duration)
+    
+    def _save_queues_for_vip(self):
+        """保存当前所有设备的队列（VIP插队时使用）"""
+        self.vip_saved_queues.clear()
+        for device_name, queue in self.queues.items():
+            if device_name == "laser_ball":
+                continue  # 激光球不需要保存
+            
+            # 保存队列中的所有指令
+            saved_commands = []
+            while True:
+                cmd = queue.get()
+                if not cmd:
+                    break
+                saved_commands.append(cmd)
+            
+            if saved_commands:
+                self.vip_saved_queues[device_name] = saved_commands
+                self.logger.info(f"[VIP插队] 保存了 [{device_name}] 的 {len(saved_commands)} 条指令")
+    
+    def _start_vip_session(self, user: str, duration: int):
+        """真正开始VIP会话"""
+        self.vip_waiting = False
+        self.logger.info(f"🎉 VIP包场正式开始: 用户[{user}], 持续{duration}秒")
         
         # 启动激光雨持续运行（整个VIP期间）
         laser_cmd = Command(
@@ -306,12 +377,22 @@ class Dispatcher:
         # 检查VIP是否到期
         if time.time() >= self.vip_expiry:
             if self.vip_user:
-                self.logger.info(f"VIP包场结束: 用户[{self.vip_user}]")
+                self.logger.info(f"✅ VIP包场结束: 用户[{self.vip_user}]")
+                # 恢复保存的队列
+                self._restore_queues_after_vip()
                 self.vip_user = None
                 self.vip_used_devices.clear()
+                self.vip_waiting = False
         
         # 如果当前有VIP用户
         if self.vip_user:
+            # VIP等待期间，所有指令都被阻塞（包括VIP自己）
+            if self.vip_waiting:
+                if content.startswith("#"):
+                    wait_time = time.time() - self.vip_waiting_start
+                    self.logger.info(f"⏳ VIP等待设备释放中({wait_time:.1f}s)，指令暂时阻塞: [{user}] {content}")
+                return
+            
             if user == self.vip_user:
                 # VIP用户的指令，全部处理
                 self._process_vip_command(user, content)
@@ -319,7 +400,7 @@ class Dispatcher:
             else:
                 # 非VIP用户，VIP期间指令被阻塞
                 if content.startswith("#"):
-                    self.logger.info(f"VIP包场中，用户[{user}]的指令被阻塞: {content}")
+                    self.logger.info(f"🚫 VIP包场中，用户[{user}]的指令被阻塞: {content}")
                 return
         
         # ========== 正常权限处理 ==========
@@ -395,6 +476,10 @@ class Dispatcher:
                     time.sleep(0.5)
                     continue
                 
+                # 检查VIP等待状态
+                if self.vip_waiting and self.vip_user:
+                    self._check_vip_waiting_status()
+                
                 # 遍历所有设备队列
                 active_work = False
                 
@@ -421,6 +506,38 @@ class Dispatcher:
             except Exception as e:
                 self.logger.error(f"分发循环异常: {e}", exc_info=True)
                 time.sleep(1.0)
+    
+    def _check_vip_waiting_status(self):
+        """检查VIP等待状态，如果所有设备都空闲了，开始VIP会话"""
+        now = time.time()
+        non_laser_devices = [name for name in self.device_busy_until.keys() if name != "laser_ball"]
+        
+        # 检查是否所有设备都空闲了
+        all_idle = True
+        for device_name in non_laser_devices:
+            if now < self.device_busy_until.get(device_name, 0):
+                all_idle = False
+                break
+        
+        if all_idle:
+            # 所有设备都空闲，开始VIP会话
+            duration = int(self.vip_expiry - now)
+            self._start_vip_session(self.vip_user, duration)
+    
+    def _restore_queues_after_vip(self):
+        """VIP结束后，恢复保存的队列"""
+        if not self.vip_saved_queues:
+            return
+        
+        self.logger.info("📋 恢复VIP之前的队列...")
+        for device_name, saved_commands in self.vip_saved_queues.items():
+            if device_name in self.queues:
+                # 将保存的指令重新放回队列（按原顺序）
+                for cmd in saved_commands:
+                    self.queues[device_name].put(cmd)
+                self.logger.info(f"[队列恢复] 设备 [{device_name}] 恢复了 {len(saved_commands)} 条指令")
+        
+        self.vip_saved_queues.clear()
     
     def _process_command(self, driver_name: str, cmd: Command):
         """处理单个指令"""

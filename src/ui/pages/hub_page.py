@@ -39,6 +39,7 @@ class HubPage(QWidget):
     def __init__(self, dispatcher=None):
         super().__init__()
         self.dispatcher = dispatcher
+        self.mock_file = "mockData/mockDanmaku.txt"  # 默认弹幕文件
         self._init_ui()
         
         # 启动定时器更新状态
@@ -46,6 +47,11 @@ class HubPage(QWidget):
             self.timer = QTimer(self)
             self.timer.timeout.connect(self._update_status)
             self.timer.start(1000)
+    
+    def set_mock_file(self, file_path: str):
+        """设置要使用的弹幕文件"""
+        self.mock_file = file_path
+        logging.info(f"HubPage: 弹幕文件已更新为 {file_path}")
             
     def _update_status(self):
         """更新状态显示"""
@@ -76,7 +82,7 @@ class HubPage(QWidget):
             return
             
         import os
-        mock_file = "mockData/mockDanmaku.txt"
+        mock_file = self.mock_file  # 使用选择的弹幕文件
         if not os.path.exists(mock_file):
             self.log_console.append(f"错误: 找不到模拟数据文件 {mock_file}")
             return
@@ -271,7 +277,7 @@ class HubPage(QWidget):
             return
             
         import os
-        mock_file = "mockData/mockDanmaku.txt"
+        mock_file = self.mock_file  # 使用选择的弹幕文件
         if not os.path.exists(mock_file):
             logging.error(f"错误: 找不到模拟数据文件 {mock_file}") # Changed from self.log_console.append
             return

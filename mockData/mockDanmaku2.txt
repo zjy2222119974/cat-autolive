@@ -1,0 +1,1274 @@
+[
+  {
+    "offset_sec": 0.5,
+    "user": "系统消息",
+    "type": "system",
+    "content": "🎥 直播间连接成功，小猫互动系统已就绪..."
+  },
+  {
+    "offset_sec": 2.0,
+    "user": "围观群众",
+    "type": "chat",
+    "content": "哇！今天的小猫好可爱啊"
+  },
+  {
+    "offset_sec": 3.5,
+    "user": "路人甲",
+    "type": "chat",
+    "content": "这直播间有什么玩法吗？"
+  },
+  {
+    "offset_sec": 5.0,
+    "user": "超级大佬",
+    "type": "gift",
+    "gift_name": "掌上明珠",
+    "count": 1,
+    "content": "送出了 掌上明珠 x1"
+  },
+  {
+    "offset_sec": 5.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "🎉🎉🎉 天降壕礼！【超级大佬】送出【掌上明珠】88.8元！VIP包场15分钟开启！激光雨自动持续运行，哈基米车专属控制，全场项目各畅玩一次！"
+  },
+  {
+    "offset_sec": 6.0,
+    "user": "吃瓜群众A",
+    "type": "chat",
+    "content": "卧槽！88块！真土豪啊！"
+  },
+  {
+    "offset_sec": 7.0,
+    "user": "吃瓜群众B",
+    "type": "chat",
+    "content": "666666666"
+  },
+  {
+    "offset_sec": 8.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5"
+  },
+  {
+    "offset_sec": 8.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进5秒"
+  },
+  {
+    "offset_sec": 10.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#冻干"
+  },
+  {
+    "offset_sec": 10.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP特权：冻干喂食器启动！小猫开吃~"
+  },
+  {
+    "offset_sec": 11.0,
+    "user": "普通用户",
+    "type": "chat",
+    "content": "我也想玩车车"
+  },
+  {
+    "offset_sec": 12.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a3"
+  },
+  {
+    "offset_sec": 12.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车左转3秒"
+  },
+  {
+    "offset_sec": 14.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d2"
+  },
+  {
+    "offset_sec": 14.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车右转2秒"
+  },
+  {
+    "offset_sec": 16.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#猫条"
+  },
+  {
+    "offset_sec": 16.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP特权：猫条喂食器启动！营养美味~"
+  },
+  {
+    "offset_sec": 17.0,
+    "user": "路人丙",
+    "type": "gift",
+    "gift_name": "鲜花",
+    "count": 1,
+    "content": "送出了 鲜花 x1"
+  },
+  {
+    "offset_sec": 17.5,
+    "user": "路人丙",
+    "type": "chat",
+    "content": "#冻干"
+  },
+  {
+    "offset_sec": 18.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏳ VIP包场中，您的指令已加入等待队列..."
+  },
+  {
+    "offset_sec": 19.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w4d2"
+  },
+  {
+    "offset_sec": 19.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车前进4秒+右转2秒"
+  },
+  {
+    "offset_sec": 22.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s3"
+  },
+  {
+    "offset_sec": 22.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车后退3秒"
+  },
+  {
+    "offset_sec": 24.0,
+    "user": "围观者",
+    "type": "chat",
+    "content": "大佬操作太秀了！"
+  },
+  {
+    "offset_sec": 25.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#膏膏"
+  },
+  {
+    "offset_sec": 25.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP特权：营养膏喂食器启动！健康成长~"
+  },
+  {
+    "offset_sec": 27.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a5w3"
+  },
+  {
+    "offset_sec": 27.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车左转5秒+前进3秒"
+  },
+  {
+    "offset_sec": 30.0,
+    "user": "榜二",
+    "type": "gift",
+    "gift_name": "比心",
+    "count": 1,
+    "content": "送出了 比心 x1"
+  },
+  {
+    "offset_sec": 30.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏳ 感谢【榜二】的比心19.9元！哈基米车12分钟驾驶权已记录，VIP结束后立即生效"
+  },
+  {
+    "offset_sec": 32.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w2d3a2"
+  },
+  {
+    "offset_sec": 32.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车前进2秒+右转3秒+左转2秒"
+  },
+  {
+    "offset_sec": 35.0,
+    "user": "弹幕机",
+    "type": "chat",
+    "content": "这车技可以的！"
+  },
+  {
+    "offset_sec": 36.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s2"
+  },
+  {
+    "offset_sec": 36.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车后退2秒"
+  },
+  {
+    "offset_sec": 38.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w3"
+  },
+  {
+    "offset_sec": 38.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进3秒"
+  },
+  {
+    "offset_sec": 40.0,
+    "user": "新粉",
+    "type": "gift",
+    "gift_name": "关注",
+    "count": 1,
+    "content": "送出了 关注"
+  },
+  {
+    "offset_sec": 40.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "🌟 欢迎【新粉】关注！激光雨5秒已记录（激光球当前已为VIP持续运行中）"
+  },
+  {
+    "offset_sec": 42.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a4w5"
+  },
+  {
+    "offset_sec": 42.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车左转4秒+前进5秒"
+  },
+  {
+    "offset_sec": 46.0,
+    "user": "观众甲",
+    "type": "chat",
+    "content": "小猫已经吃饱了吧哈哈哈"
+  },
+  {
+    "offset_sec": 47.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d3s2"
+  },
+  {
+    "offset_sec": 47.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车右转3秒+后退2秒"
+  },
+  {
+    "offset_sec": 50.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w6"
+  },
+  {
+    "offset_sec": 50.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进6秒"
+  },
+  {
+    "offset_sec": 52.0,
+    "user": "普通玩家",
+    "type": "gift",
+    "gift_name": "人气票",
+    "count": 3,
+    "content": "送出了 人气票 x3"
+  },
+  {
+    "offset_sec": 52.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏳ 感谢【普通玩家】的人气票x3！猫粮喂食已加入队列，VIP结束后执行"
+  },
+  {
+    "offset_sec": 54.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a2"
+  },
+  {
+    "offset_sec": 54.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车左转2秒"
+  },
+  {
+    "offset_sec": 56.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w4"
+  },
+  {
+    "offset_sec": 56.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进4秒"
+  },
+  {
+    "offset_sec": 58.0,
+    "user": "气氛组",
+    "type": "chat",
+    "content": "这就是有钱人的快乐吗"
+  },
+  {
+    "offset_sec": 60.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d5"
+  },
+  {
+    "offset_sec": 60.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车右转5秒"
+  },
+  {
+    "offset_sec": 62.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s4w2"
+  },
+  {
+    "offset_sec": 62.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车后退4秒+前进2秒"
+  },
+  {
+    "offset_sec": 65.0,
+    "user": "观众乙",
+    "type": "chat",
+    "content": "这操作堪比老司机！"
+  },
+  {
+    "offset_sec": 66.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a3d3"
+  },
+  {
+    "offset_sec": 66.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车左转3秒+右转3秒"
+  },
+  {
+    "offset_sec": 69.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5"
+  },
+  {
+    "offset_sec": 69.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进5秒"
+  },
+  {
+    "offset_sec": 71.0,
+    "user": "榜三",
+    "type": "gift",
+    "gift_name": "爱的纸鹤",
+    "count": 1,
+    "content": "送出了 爱的纸鹤 x1"
+  },
+  {
+    "offset_sec": 71.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏳ 感谢【榜三】的爱的纸鹤99元！猫罐头1分钟已记录，VIP结束后执行"
+  },
+  {
+    "offset_sec": 73.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d2w3a2"
+  },
+  {
+    "offset_sec": 73.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车右转2秒+前进3秒+左转2秒"
+  },
+  {
+    "offset_sec": 76.0,
+    "user": "路人甲",
+    "type": "chat",
+    "content": "小猫都被玩晕了吧"
+  },
+  {
+    "offset_sec": 77.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s3"
+  },
+  {
+    "offset_sec": 77.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车后退3秒"
+  },
+  {
+    "offset_sec": 79.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w2"
+  },
+  {
+    "offset_sec": 79.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进2秒"
+  },
+  {
+    "offset_sec": 81.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a4"
+  },
+  {
+    "offset_sec": 81.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车左转4秒"
+  },
+  {
+    "offset_sec": 83.0,
+    "user": "围观群众",
+    "type": "chat",
+    "content": "大佬手速真快"
+  },
+  {
+    "offset_sec": 84.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5a2d3"
+  },
+  {
+    "offset_sec": 84.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车前进5秒+左转2秒+右转3秒"
+  },
+  {
+    "offset_sec": 88.0,
+    "user": "新观众",
+    "type": "chat",
+    "content": "第一次见这么壮观的场面"
+  },
+  {
+    "offset_sec": 89.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s2"
+  },
+  {
+    "offset_sec": 89.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车后退2秒"
+  },
+  {
+    "offset_sec": 91.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d4w3"
+  },
+  {
+    "offset_sec": 91.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车右转4秒+前进3秒"
+  },
+  {
+    "offset_sec": 94.0,
+    "user": "普通用户2",
+    "type": "gift",
+    "gift_name": "鲜花",
+    "count": 1,
+    "content": "送出了 鲜花 x1"
+  },
+  {
+    "offset_sec": 94.5,
+    "user": "普通用户2",
+    "type": "chat",
+    "content": "#猫条"
+  },
+  {
+    "offset_sec": 95.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏳ VIP包场中，您的指令已加入等待队列..."
+  },
+  {
+    "offset_sec": 96.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a3w4"
+  },
+  {
+    "offset_sec": 96.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车左转3秒+前进4秒"
+  },
+  {
+    "offset_sec": 99.0,
+    "user": "观众丙",
+    "type": "chat",
+    "content": "这车都快磨损了哈哈"
+  },
+  {
+    "offset_sec": 100.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s5d2"
+  },
+  {
+    "offset_sec": 100.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车后退5秒+右转2秒"
+  },
+  {
+    "offset_sec": 103.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w6"
+  },
+  {
+    "offset_sec": 103.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进6秒"
+  },
+  {
+    "offset_sec": 105.0,
+    "user": "路人乙",
+    "type": "chat",
+    "content": "佩服佩服！"
+  },
+  {
+    "offset_sec": 106.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a5"
+  },
+  {
+    "offset_sec": 106.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车左转5秒"
+  },
+  {
+    "offset_sec": 108.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w3d4s2"
+  },
+  {
+    "offset_sec": 108.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车前进3秒+右转4秒+后退2秒"
+  },
+  {
+    "offset_sec": 112.0,
+    "user": "围观粉丝",
+    "type": "chat",
+    "content": "真的是在玩漂移吗哈哈哈"
+  },
+  {
+    "offset_sec": 113.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d3"
+  },
+  {
+    "offset_sec": 113.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车右转3秒"
+  },
+  {
+    "offset_sec": 115.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w4a3"
+  },
+  {
+    "offset_sec": 115.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车前进4秒+左转3秒"
+  },
+  {
+    "offset_sec": 118.0,
+    "user": "吃瓜群众C",
+    "type": "chat",
+    "content": "这88块花得很值啊"
+  },
+  {
+    "offset_sec": 119.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s4"
+  },
+  {
+    "offset_sec": 119.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车后退4秒"
+  },
+  {
+    "offset_sec": 121.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5d3a2"
+  },
+  {
+    "offset_sec": 121.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车前进5秒+右转3秒+左转2秒"
+  },
+  {
+    "offset_sec": 125.0,
+    "user": "观众丁",
+    "type": "chat",
+    "content": "专业车手既视感"
+  },
+  {
+    "offset_sec": 126.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a4w2"
+  },
+  {
+    "offset_sec": 126.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车左转4秒+前进2秒"
+  },
+  {
+    "offset_sec": 129.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d5s3"
+  },
+  {
+    "offset_sec": 129.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车右转5秒+后退3秒"
+  },
+  {
+    "offset_sec": 132.0,
+    "user": "榜四",
+    "type": "gift",
+    "gift_name": "粉丝灯牌",
+    "count": 1,
+    "content": "送出了 粉丝灯牌 x1"
+  },
+  {
+    "offset_sec": 132.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "🌟 感谢【榜四】点亮灯牌！激光雨10秒已记录（激光球当前已为VIP持续运行中）"
+  },
+  {
+    "offset_sec": 134.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w6a2d3"
+  },
+  {
+    "offset_sec": 134.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车前进6秒+左转2秒+右转3秒"
+  },
+  {
+    "offset_sec": 138.0,
+    "user": "路人丙",
+    "type": "chat",
+    "content": "VIP还有多久结束啊"
+  },
+  {
+    "offset_sec": 139.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s2w4"
+  },
+  {
+    "offset_sec": 139.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车后退2秒+前进4秒"
+  },
+  {
+    "offset_sec": 142.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a3"
+  },
+  {
+    "offset_sec": 142.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车左转3秒"
+  },
+  {
+    "offset_sec": 144.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5"
+  },
+  {
+    "offset_sec": 144.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进5秒"
+  },
+  {
+    "offset_sec": 146.0,
+    "user": "观众戊",
+    "type": "chat",
+    "content": "小猫：我好累啊想睡觉"
+  },
+  {
+    "offset_sec": 147.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d4a2s3"
+  },
+  {
+    "offset_sec": 147.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车右转4秒+左转2秒+后退3秒"
+  },
+  {
+    "offset_sec": 151.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w6d3"
+  },
+  {
+    "offset_sec": 151.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车前进6秒+右转3秒"
+  },
+  {
+    "offset_sec": 154.0,
+    "user": "弹幕组",
+    "type": "chat",
+    "content": "这才是真正的VIP体验！"
+  },
+  {
+    "offset_sec": 155.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a5w3s2"
+  },
+  {
+    "offset_sec": 155.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车左转5秒+前进3秒+后退2秒"
+  },
+  {
+    "offset_sec": 159.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d2"
+  },
+  {
+    "offset_sec": 159.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车右转2秒"
+  },
+  {
+    "offset_sec": 161.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w4a3d2"
+  },
+  {
+    "offset_sec": 161.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车前进4秒+左转3秒+右转2秒"
+  },
+  {
+    "offset_sec": 165.0,
+    "user": "围观者2",
+    "type": "chat",
+    "content": "这已经玩了快3分钟了吧"
+  },
+  {
+    "offset_sec": 166.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s5"
+  },
+  {
+    "offset_sec": 166.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车后退5秒"
+  },
+  {
+    "offset_sec": 168.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w2d4a3"
+  },
+  {
+    "offset_sec": 168.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车前进2秒+右转4秒+左转3秒"
+  },
+  {
+    "offset_sec": 172.0,
+    "user": "观众己",
+    "type": "chat",
+    "content": "这车都快被玩坏了"
+  },
+  {
+    "offset_sec": 173.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a4"
+  },
+  {
+    "offset_sec": 173.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车左转4秒"
+  },
+  {
+    "offset_sec": 175.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5s3"
+  },
+  {
+    "offset_sec": 175.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车前进5秒+后退3秒"
+  },
+  {
+    "offset_sec": 178.0,
+    "user": "普通观众",
+    "type": "chat",
+    "content": "太羡慕了"
+  },
+  {
+    "offset_sec": 179.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d5a2w4"
+  },
+  {
+    "offset_sec": 179.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车右转5秒+左转2秒+前进4秒"
+  },
+  {
+    "offset_sec": 183.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s2"
+  },
+  {
+    "offset_sec": 183.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车后退2秒"
+  },
+  {
+    "offset_sec": 185.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w6a3"
+  },
+  {
+    "offset_sec": 185.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车前进6秒+左转3秒"
+  },
+  {
+    "offset_sec": 188.0,
+    "user": "路人庚",
+    "type": "chat",
+    "content": "真会玩！"
+  },
+  {
+    "offset_sec": 189.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d4w2s3"
+  },
+  {
+    "offset_sec": 189.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车右转4秒+前进2秒+后退3秒"
+  },
+  {
+    "offset_sec": 193.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a3w5"
+  },
+  {
+    "offset_sec": 193.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车左转3秒+前进5秒"
+  },
+  {
+    "offset_sec": 196.0,
+    "user": "吃瓜观众",
+    "type": "chat",
+    "content": "服了服了，太秀了"
+  },
+  {
+    "offset_sec": 197.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s4d2"
+  },
+  {
+    "offset_sec": 197.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车后退4秒+右转2秒"
+  },
+  {
+    "offset_sec": 200.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w3"
+  },
+  {
+    "offset_sec": 200.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进3秒"
+  },
+  {
+    "offset_sec": 202.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "还剩多久？我把所有项目玩一遍"
+  },
+  {
+    "offset_sec": 203.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏱️ VIP剩余时间约12分钟，您可以继续畅玩！"
+  },
+  {
+    "offset_sec": 204.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a5w4d3"
+  },
+  {
+    "offset_sec": 204.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车左转5秒+前进4秒+右转3秒"
+  },
+  {
+    "offset_sec": 208.0,
+    "user": "观众辛",
+    "type": "chat",
+    "content": "这系统真的很完善啊"
+  },
+  {
+    "offset_sec": 209.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w6"
+  },
+  {
+    "offset_sec": 209.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车前进6秒"
+  },
+  {
+    "offset_sec": 211.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s5a2"
+  },
+  {
+    "offset_sec": 211.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车后退5秒+左转2秒"
+  },
+  {
+    "offset_sec": 214.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d4w3"
+  },
+  {
+    "offset_sec": 214.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车右转4秒+前进3秒"
+  },
+  {
+    "offset_sec": 217.0,
+    "user": "普通玩家3",
+    "type": "gift",
+    "gift_name": "真爱玫瑰",
+    "count": 1,
+    "content": "送出了 真爱玫瑰 x1"
+  },
+  {
+    "offset_sec": 217.5,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏳ 感谢【普通玩家3】的真爱玫瑰52元！哈基米车30分钟超长驾驶权已记录，VIP结束后立即生效"
+  },
+  {
+    "offset_sec": 219.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#a3s2w4"
+  },
+  {
+    "offset_sec": 219.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车左转3秒+后退2秒+前进4秒"
+  },
+  {
+    "offset_sec": 223.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w5d2"
+  },
+  {
+    "offset_sec": 223.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车前进5秒+右转2秒"
+  },
+  {
+    "offset_sec": 226.0,
+    "user": "评论区",
+    "type": "chat",
+    "content": "这是我见过最壕的直播间"
+  },
+  {
+    "offset_sec": 227.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s4a3"
+  },
+  {
+    "offset_sec": 227.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车后退4秒+左转3秒"
+  },
+  {
+    "offset_sec": 230.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w6d4a2s3"
+  },
+  {
+    "offset_sec": 230.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP超长组合：哈基米车前进6秒+右转4秒+左转2秒+后退3秒"
+  },
+  {
+    "offset_sec": 235.0,
+    "user": "观众壬",
+    "type": "chat",
+    "content": "这指令都快写代码了哈哈"
+  },
+  {
+    "offset_sec": 236.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#d5"
+  },
+  {
+    "offset_sec": 236.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP指令：哈基米车右转5秒"
+  },
+  {
+    "offset_sec": 238.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#w3a4"
+  },
+  {
+    "offset_sec": 238.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP组合指令：哈基米车前进3秒+左转4秒"
+  },
+  {
+    "offset_sec": 241.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "#s2d3w5"
+  },
+  {
+    "offset_sec": 241.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ VIP多段组合：哈基米车后退2秒+右转3秒+前进5秒"
+  },
+  {
+    "offset_sec": 246.0,
+    "user": "路人癸",
+    "type": "chat",
+    "content": "大佬玩得好开心"
+  },
+  {
+    "offset_sec": 247.0,
+    "user": "超级大佬",
+    "type": "chat",
+    "content": "好了，现在体验一下其他项目"
+  },
+  {
+    "offset_sec": 249.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "💡 提示：您的VIP特权包含所有设备各玩一次的机会哦！"
+  },
+  {
+    "offset_sec": 305.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "⏱️ 【超级大佬】的VIP包场已结束！感谢您的支持！队列中的其他用户指令开始执行..."
+  },
+  {
+    "offset_sec": 305.5,
+    "user": "榜二",
+    "type": "chat",
+    "content": "#w3"
+  },
+  {
+    "offset_sec": 305.7,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ 【榜二】的车辆时长生效：哈基米车前进3秒"
+  },
+  {
+    "offset_sec": 307.0,
+    "user": "围观群众D",
+    "type": "chat",
+    "content": "终于轮到其他人了"
+  },
+  {
+    "offset_sec": 308.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ 执行队列任务：【路人丙】的冻干喂食"
+  },
+  {
+    "offset_sec": 309.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ 执行队列任务：【普通玩家】的人气票x3，猫粮投喂中..."
+  },
+  {
+    "offset_sec": 310.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ 执行队列任务：【榜三】的猫罐头1分钟开始"
+  },
+  {
+    "offset_sec": 311.0,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ 执行队列任务：【普通用户2】的猫条喂食"
+  },
+  {
+    "offset_sec": 312.0,
+    "user": "普通用户2",
+    "type": "chat",
+    "content": "终于轮到我了！"
+  },
+  {
+    "offset_sec": 313.0,
+    "user": "榜二",
+    "type": "chat",
+    "content": "#a2d3"
+  },
+  {
+    "offset_sec": 313.2,
+    "user": "AI助手",
+    "type": "system",
+    "content": "✅ 【榜二】的车辆时长：哈基米车左转2秒+右转3秒"
+  },
+  {
+    "offset_sec": 315.0,
+    "user": "新观众2",
+    "type": "chat",
+    "content": "刚才那个大佬玩得真过瘾"
+  },
+  {
+    "offset_sec": 320.0,
+    "user": "系统消息",
+    "type": "system",
+    "content": "📊 数据统计：本场VIP包场游戏指令总数50+次，体验时长5分钟，完美诠释了掌上明珠VIP特权！"
+  },
+  {
+    "offset_sec": 325.0,
+    "user": "系统消息",
+    "type": "system",
+    "content": "🎬 模拟结束。"
+  }
+]
