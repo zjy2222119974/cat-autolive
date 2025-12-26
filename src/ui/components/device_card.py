@@ -8,7 +8,9 @@ class DeviceCard(QFrame):
     def __init__(self, name: str, device_type: str, driver=None, parent=None):
         super().__init__(parent)
         self.driver = driver
-        self.setFixedSize(260, 140)  # 接近方形，但高度较小
+        self.setFixedSize(240, 120)  # Fixed size for stability in FlowLayout
+
+
         
         # 设置样式
         self.setStyleSheet("""
@@ -30,64 +32,75 @@ class DeviceCard(QFrame):
         shadow.setOffset(0, 2)
         self.setGraphicsEffect(shadow)
         
+
         # 主布局：垂直排列
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(15, 25, 15, 15)
-        main_layout.setSpacing(10)
-        
-        # 设备名称（顶部居中）
+        main_layout.setContentsMargins(16, 16, 16, 16)
+        main_layout.setSpacing(0)
+
+        # 顶部区域：标题 + 状态灯
+        top_layout = QHBoxLayout()
+        top_layout.setSpacing(10)
+
+        # 设备名称
         self.name_label = QLabel(name)
-        self.name_label.setStyleSheet("font-size: 22px; font-weight: bold; color: white;")
+        self.name_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #e0e0e0; border: none; background: transparent;")
         self.name_label.setWordWrap(True)
-        self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        main_layout.addWidget(self.name_label)
+        self.name_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        top_layout.addWidget(self.name_label, 1)
+
+        # 状态指示灯
+        self.status_light = QLabel()
+        self.status_light.setFixedSize(14, 14)
+        self.status_light.setStyleSheet("background-color: #52c41a; border-radius: 7px;") 
+        top_layout.addWidget(self.status_light, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
+
+        main_layout.addLayout(top_layout)
         
         main_layout.addStretch()
         
-        # 底部信息区域：左右分栏
+        # 底部区域
         bottom_layout = QHBoxLayout()
-        bottom_layout.setSpacing(20)
+        bottom_layout.setSpacing(0)
+        bottom_layout.setContentsMargins(0, 5, 0, 0)
         
         # 左侧：设备类型
-        left_widget = QFrame()
-        left_layout = QVBoxLayout(left_widget)
-        left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.setSpacing(5)
-        left_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        
         type_label = QLabel(device_type)
-        type_label.setStyleSheet("font-size: 14px; color: #888888;")
-        type_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        left_layout.addWidget(type_label)
+        type_label.setStyleSheet("font-size: 12px; color: #888888; border: none; background: transparent;")
+        type_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        bottom_layout.addWidget(type_label)
         
-        bottom_layout.addWidget(left_widget)
+        bottom_layout.addStretch()
         
-        # 右侧：状态信息
-        right_widget = QFrame()
-        right_layout = QVBoxLayout(right_widget)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(5)
-        right_layout.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        # 右侧：状态信息容器 (深色背景)
+        self.status_container = QFrame()
+        self.status_container.setFixedSize(80, 50) # 固定大小以匹配设计感
+        self.status_container.setStyleSheet("""
+            QFrame {
+                background-color: #1a1a1a;
+                border-radius: 6px;
+                border: none;
+            }
+        """)
+        
+        status_layout = QVBoxLayout(self.status_container)
+        status_layout.setContentsMargins(0, 0, 0, 0)
+        status_layout.setSpacing(2)
+        status_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         self.user_label = QLabel("空闲")
-        self.user_label.setStyleSheet("font-size: 14px; color: #cccccc;")
-        self.user_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        right_layout.addWidget(self.user_label)
+        self.user_label.setStyleSheet("font-size: 12px; color: #cccccc; background: transparent;")
+        self.user_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        status_layout.addWidget(self.user_label)
         
         self.time_label = QLabel("0s")
-        self.time_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #007acc;")
-        self.time_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        right_layout.addWidget(self.time_label)
+        self.time_label.setStyleSheet("font-size: 14px; font-weight: normal; color: #e0e0e0; background: transparent;")
+        self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        status_layout.addWidget(self.time_label)
         
-        bottom_layout.addWidget(right_widget)
+        bottom_layout.addWidget(self.status_container)
         
         main_layout.addLayout(bottom_layout)
-        
-        # 状态指示灯 (圆形) - 使用绝对定位放在右上角
-        self.status_light = QLabel(self)
-        self.status_light.setFixedSize(20, 20)
-        self.status_light.setStyleSheet("background-color: #ff4d4f; border-radius: 10px;") # 默认红色
-        self.status_light.move(230, 10)  # 放置在右上角（260-20-10=230）
         
         # 如果有驱动，初始化状态
         if self.driver:
@@ -98,10 +111,10 @@ class DeviceCard(QFrame):
         self.user_label.setText(current_user if current_user else "空闲")
         if time_left > 0:
             self.time_label.setText(f"{time_left}s")
-            self.time_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #007acc;")
+            self.time_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #3399ff; background: transparent;")
         else:
             self.time_label.setText("0s")
-            self.time_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #666666;")
+            self.time_label.setStyleSheet("font-size: 14px; font-weight: normal; color: #e0e0e0; background: transparent;")
 
     def update_status(self):
         """更新连接状态"""
@@ -112,14 +125,6 @@ class DeviceCard(QFrame):
             
     def set_connected(self, connected: bool):
         if connected:
-            self.status_light.setStyleSheet("""
-                background-color: #52c41a; 
-                border-radius: 10px;
-                border: 2px solid #2b5c12;
-            """)
+            self.status_light.setStyleSheet("background-color: #52c41a; border-radius: 7px;")
         else:
-            self.status_light.setStyleSheet("""
-                background-color: #ff4d4f; 
-                border-radius: 10px;
-                border: 2px solid #5c1b1c;
-            """)
+            self.status_light.setStyleSheet("background-color: #ff4d4f; border-radius: 7px;")

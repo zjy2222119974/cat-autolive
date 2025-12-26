@@ -116,13 +116,35 @@ class HubPage(QWidget):
         layout.addWidget(title)
         
         # 2. 设备网格区域
-        # 使用 FlowLayout 或者简单的 GridLayout
-        # 这里为了简单对齐，使用 GridLayout
+        # 使用 FlowLayout + ScrollArea
         
-        grid_widget = QWidget()
-        grid_layout = QGridLayout(grid_widget)
-        grid_layout.setSpacing(20)
-        grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        # 创建滚动区域
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setStyleSheet("""
+            QScrollArea { background-color: transparent; }
+            QWidget#scroll_content { background-color: transparent; }
+        """)
+        
+        # 自定义内容容器，确保 resize 时重新布局
+        class ResizableScrollContent(QWidget):
+            def resizeEvent(self, event):
+                super().resizeEvent(event)
+                # 强制布局更新
+                if self.layout():
+                    self.layout().activate()
+        
+        # 内容容器
+        scroll_content = ResizableScrollContent()
+        scroll_content.setObjectName("scroll_content")
+        
+        # 使用自定义的流式布局
+        from src.ui.components.flow_layout import FlowLayout
+        self.flow_layout = FlowLayout(scroll_content, margin=10, spacing=20)
+        
+        scroll_area.setWidget(scroll_content)
         
         self.device_cards = []
         
@@ -150,10 +172,6 @@ class HubPage(QWidget):
                 ("laser_ball", "物联网"),
             ]
             
-            row = 0
-            col = 0
-            max_cols = 4 # 每行4个
-            
             for key, type_label in device_infos:
                 driver = self.dispatcher.drivers.get(key)
                 display_name = name_map.get(key, key)
@@ -167,17 +185,12 @@ class HubPage(QWidget):
                 card = DeviceCard(display_name, real_type, driver)
                 self.device_cards.append(card)
                 
-                grid_layout.addWidget(card, row, col)
-                
-                col += 1
-                if col >= max_cols:
-                    col = 0
-                    row += 1
+                self.flow_layout.addWidget(card)
                     
-        layout.addWidget(grid_widget)
+        layout.addWidget(scroll_area, 1)
         
         # 弹簧
-        layout.addStretch()
+        # layout.addStretch() # ScrollArea now takes the space
         
         # 4. 控制按钮区域（底部）
         btn_layout = QHBoxLayout()
