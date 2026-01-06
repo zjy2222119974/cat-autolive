@@ -1,0 +1,34 @@
+{
+  "feeder_paste": {
+    "type": "PasteFeederDriver",
+    "host": "192.168.1.101",
+    "port": 80
+  },
+  "feeder_kibble": {
+    "type": "KibbleFeederDriver",
+    "app_package": "com.feeder.kibble"
+  },
+  "feeder_freeze_dried": {
+    "type": "FreezeDriedFeederDriver",
+    "app_package": "com.feeder.freeze"
+  },
+  "feeder_canned": {
+    "type": "CannedFeederDriver",
+    "host": "192.168.1.102",
+    "port": 80
+  },
+  "car_hakimi": {
+    "type": "HakimiCarDriver",
+    "host": "192.168.1.103",
+    "port": 80
+  },
+  "laser_ball": {
+    "type": "LaserBallDriver",
+    "host": "192.168.1.104",
+    "port": 80
+  },
+  "catlink": {
+    "type": "IntegratedAppDriver",
+    "app_package": "com.app.integrated.catlink"
+  }
+}

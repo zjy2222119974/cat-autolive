@@ -1,26 +1,4 @@
-"""中枢页面"""
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGroupBox, QFormLayout
-from PyQt6.QtCore import Qt
-
-class HubPage(QWidget):
-    """中枢控制页面"""
-    
-    
-    def __init__(self, dispatcher=None):
-        super().__init__()
-        self.dispatcher = dispatcher
-        self._init_ui()
-        
-        # 启动定时器更新状态
-        if self.dispatcher:
-            from PyQt6.QtCore import QTimer
-            self.timer = QTimer(self)
-            self.timer.timeout.connect(self._update_status)
-            self.timer.start(1000)
-    
-    def _update_status(self):
-        """更新状态显示"""
 """中枢页面"""
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGroupBox, QFormLayout, QGridLayout, QScrollArea, QTextEdit, QHBoxLayout, QPushButton
@@ -261,6 +239,55 @@ class HubPage(QWidget):
     #     log_handler = QTextEditLogger(self.log_console)
     #     logger.addHandler(log_handler)
     
+    def refresh_devices(self):
+        """刷新设备列表"""
+        if not hasattr(self, 'grid_layout'):
+            return
+            
+        # 清除现有内容
+        while self.grid_layout.count():
+            item = self.grid_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+                
+        self.device_cards = []
+        
+        if not self.dispatcher:
+            return
+            
+        # 名字映射
+        name_map = {
+            "feeder_paste": "湿粮喂食器",
+            "feeder_kibble": "猫粮喂食器",
+            "feeder_freeze_dried": "冻干喂食器",
+            "feeder_canned": "猫罐喂食器",
+            "car_hakimi": "哈基米车",
+            "laser_ball": "激光灯球"
+        }
+        
+        row = 0
+        col = 0
+        max_cols = 4
+        
+        # 遍历所有驱动
+        for key, driver in self.dispatcher.drivers.items():
+            display_name = name_map.get(key, key)
+            
+            real_type = "物联网"
+            if isinstance(driver, SimulatorDriver):
+                real_type = "模拟器"
+            
+            card = DeviceCard(display_name, real_type, driver)
+            self.device_cards.append(card)
+            
+            self.grid_layout.addWidget(card, row, col)
+            
+            col += 1
+            if col >= max_cols:
+                col = 0
+                row += 1
+    
     def _update_status(self):
         """更新状态显示"""
         if not self.dispatcher:
@@ -328,59 +355,13 @@ class HubPage(QWidget):
         # 这里为了简单对齐，使用 GridLayout
         
         grid_widget = QWidget()
-        grid_layout = QGridLayout(grid_widget)
-        grid_layout.setSpacing(20)
-        grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.grid_layout = QGridLayout(grid_widget)
+        self.grid_layout.setSpacing(20)
+        self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
-        self.device_cards = []
-        
-        if self.dispatcher:
-            # 获取所有设备并创建卡片
-            # 我们按照固定顺序或名字排序
-            drivers = list(self.dispatcher.drivers.items())
-            
-            # 手动映射中文名称
-            name_map = {
-                "feeder_paste": "湿粮喂食器",
-                "feeder_kibble": "猫粮喂食器",
-                "feeder_freeze_dried": "冻干喂食器",
-                "feeder_canned": "猫罐喂食器",
-                "car_hakimi": "哈基米车",
-                "laser_ball": "激光灯球"
-            }
-            
-            device_infos = [
-                ("feeder_paste", "物联网"),
-                ("feeder_kibble", "模拟器"),
-                ("feeder_freeze_dried", "模拟器"),
-                ("feeder_canned", "物联网"),
-                ("car_hakimi", "物联网"),
-                ("laser_ball", "物联网"),
-            ]
-            
-            row = 0
-            col = 0
-            max_cols = 4 # 每行4个
-            
-            for key, type_label in device_infos:
-                driver = self.dispatcher.drivers.get(key)
-                display_name = name_map.get(key, key)
-                
-                # 如果是模拟器，类型显示模拟器，否则显示物联网(默认)
-                # 为了更准确，可以检查 driver 类型
-                real_type = "物联网"
-                if driver and isinstance(driver, SimulatorDriver):
-                    real_type = "模拟器"
-                
-                card = DeviceCard(display_name, real_type, driver)
-                self.device_cards.append(card)
-                
-                grid_layout.addWidget(card, row, col)
-                
-                col += 1
-                if col >= max_cols:
-                    col = 0
-                    row += 1
+        self.refresh_devices()
+                    
+        layout.addWidget(grid_widget)
                     
         layout.addWidget(grid_widget)
         

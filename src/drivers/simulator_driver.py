@@ -16,9 +16,14 @@ class SimulatorDriver(BaseDriver):
         self.window_title = window_title
         self._connected = False
         
-    def connect(self) -> bool:
+    def connect(self, hwnd: int = None) -> bool:
         """连接模拟器/APP"""
         self.logger.info(f"正在连接模拟器设备 [{self.name}] ...")
+        
+        if hwnd:
+            self.hwnd = hwnd
+            self.logger.info(f"绑定窗口句柄: {hwnd}")
+        
         # TODO: 检查 ADB 连接或 窗口句柄
         if self.app_package:
              self.logger.info(f"目标应用包名: {self.app_package}")

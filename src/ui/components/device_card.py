@@ -10,6 +10,11 @@ class DeviceCard(QFrame):
         self.driver = driver
         self.setFixedSize(240, 120)  # Fixed size for stability in FlowLayout
 
+        # 允许右键菜单
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_context_menu)
+
+
 
         
         # 设置样式
@@ -128,3 +133,46 @@ class DeviceCard(QFrame):
             self.status_light.setStyleSheet("background-color: #52c41a; border-radius: 7px;")
         else:
             self.status_light.setStyleSheet("background-color: #ff4d4f; border-radius: 7px;")
+
+    def _show_context_menu(self, pos):
+        """显示右键菜单"""
+        from PyQt6.QtWidgets import QMenu
+        from PyQt6.QtGui import QAction
+        
+        if not self.driver:
+            return
+            
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background-color: #2d2d30;
+                color: #d4d4d4;
+                border: 1px solid #3e3e42;
+            }
+            QMenu::item:selected {
+                background-color: #094771;
+            }
+        """)
+        
+        if self.driver.is_connected:
+            action = QAction("断开连接", self)
+            action.triggered.connect(self._disconnect_device)
+        else:
+            action = QAction("连接设备", self)
+            action.triggered.connect(self._connect_device)
+            
+        menu.addAction(action)
+        menu.exec(self.mapToGlobal(pos))
+        
+    def _connect_device(self):
+        if self.driver:
+            # 在新线程或异步中执行比较好，这里简单起见主要为了演示
+            # 因为 driver.connect() 可能有 sleep
+            success = self.driver.connect()
+            if success:
+                self.update_status()
+                
+    def _disconnect_device(self):
+        if self.driver:
+            self.driver.disconnect()
+            self.update_status()

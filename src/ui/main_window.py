@@ -185,6 +185,17 @@ class MainWindow(QMainWindow):
         exit_action.triggered.connect(self.close)
         menu_action.addAction(exit_action)
         
+        # 添加控制器子菜单
+        add_controller_menu = menu_action.addMenu("添加控制器")
+        
+        add_sim_action = QAction("模拟器", self)
+        add_sim_action.triggered.connect(self._show_add_simulator_dialog)
+        add_controller_menu.addAction(add_sim_action)
+        
+        add_iot_action = QAction("物联网", self)
+        add_iot_action.setEnabled(False) # 暂未实现
+        add_controller_menu.addAction(add_iot_action)
+        
         # 测试弹幕子菜单
         mock_menu = menu_action.addMenu("测试弹幕")
         self._create_mock_file_menu(mock_menu)
@@ -293,4 +304,64 @@ class MainWindow(QMainWindow):
         
         dialog = GiftConfigDialog(config_path, self)
         dialog.exec()
+
+    def _show_add_simulator_dialog(self):
+        """显示新增模拟器对话框"""
+        from src.ui.dialogs.add_simulator_dialog import AddSimulatorDialog
+        from src.utils.device_manager import save_device, create_driver
+        from PyQt6.QtWidgets import QMessageBox
+        
+        dialog = AddSimulatorDialog(self)
+        if dialog.exec():
+            data = dialog.get_data()
+            name = data['name']
+            type_label = data['type_label']
+            
+            # 检查名称是否已存在
+            if self.dispatcher and name in self.dispatcher.drivers:
+                 QMessageBox.warning(self, "错误", f"设备名称 '{name}' 已存在！")
+                 return
+            
+            # 准备配置
+            config = {}
+            if type_label == "猫粮喂食器":
+                 config = {
+                     "type": "KibbleFeederDriver", 
+                     "app_package": f"com.feeder.kibble.{name}"
+                 }
+            elif type_label == "冻干喂食器":
+                 config = {
+                     "type": "FreezeDriedFeederDriver", 
+                     "app_package": f"com.feeder.freeze.{name}"
+                 }
+            elif type_label == "整合APP":
+                 config = {
+                     "type": "IntegratedAppDriver", 
+                     "app_package": f"com.app.integrated.{name}"
+                 }
+            
+            # 保存到配置文件
+            if config:
+                save_device(name, config)
+                self.logger.info(f"保存设备配置: {name}")
+
+            # 实例化驱动
+            driver = create_driver(name, config)
+            
+            if driver and self.dispatcher:
+                # 注册驱动 (默认不连接，即红色圆点状态)
+                self.dispatcher.register_driver(name, driver)
+                
+                # 刷新 UI
+                # HubPage (Index 0)
+                if len(self.pages) > 0 and hasattr(self.pages[0], 'refresh_devices'):
+                    self.pages[0].refresh_devices()
+                
+                # EmulatorPage (Index 1)
+                if len(self.pages) > 1 and hasattr(self.pages[1], 'refresh_all'):
+                    self.pages[1].refresh_all()
+                    
+                self.logger.info(f"成功添加模拟器: {name} [{type_label}]")
+                self.statusBar().showMessage(f"已添加设备: {name}")
+
 

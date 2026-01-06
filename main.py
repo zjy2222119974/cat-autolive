@@ -37,42 +37,23 @@ def main():
     
     # 初始化核心中枢
     from src.core.dispatcher import Dispatcher
-    from src.drivers.devices import (
-        PasteFeederDriver, KibbleFeederDriver, FreezeDriedFeederDriver,
-        CannedFeederDriver, HakimiCarDriver, LaserBallDriver
-    )
+    from src.core.dispatcher import Dispatcher
+    from src.utils.device_manager import load_devices, create_driver
     
     dispatcher = Dispatcher()
     
-    # 1. 猫条/化毛膏喂食器 (物联网)
-    feeder_paste = PasteFeederDriver("feeder_paste", host="192.168.1.101", port=80)
-    feeder_paste.connect() # 立即连接
-    dispatcher.register_driver("feeder_paste", feeder_paste)
-    
-    # 2. 猫粮喂食器 (模拟器)
-    feeder_kibble = KibbleFeederDriver("feeder_kibble", app_package="com.feeder.kibble")
-    feeder_kibble.connect()
-    dispatcher.register_driver("feeder_kibble", feeder_kibble)
-    
-    # 3. 冻干喂食器 (模拟器)
-    feeder_freeze_dried = FreezeDriedFeederDriver("feeder_freeze_dried", app_package="com.feeder.freeze")
-    feeder_freeze_dried.connect()
-    dispatcher.register_driver("feeder_freeze_dried", feeder_freeze_dried)
-    
-    # 4. 猫罐喂食器 (物联网)
-    feeder_canned = CannedFeederDriver("feeder_canned", host="192.168.1.102", port=80)
-    feeder_canned.connect()
-    dispatcher.register_driver("feeder_canned", feeder_canned)
-    
-    # 5. 哈基米车 (物联网)
-    car_hakimi = HakimiCarDriver("car_hakimi", host="192.168.1.103", port=80)
-    car_hakimi.connect()
-    dispatcher.register_driver("car_hakimi", car_hakimi)
-    
-    # 6. 激光灯球 (物联网)
-    laser_ball = LaserBallDriver("laser_ball", host="192.168.1.104", port=80)
-    laser_ball.connect()
-    dispatcher.register_driver("laser_ball", laser_ball)
+    # 加载并注册所有设备
+    devices_config = load_devices()
+    for name, config in devices_config.items():
+        driver = create_driver(name, config)
+        if driver:
+            # IoT 设备通常需要 host 配置，模拟器需要包名
+            # 这里统一注册，connect 由用户手动触发或后续逻辑处理
+            dispatcher.register_driver(name, driver)
+            logger.info(f"已加载设备: {name} ({config.get('type')})")
+        else:
+            logger.error(f"无法创建驱动: {name}, 配置: {config}")
+
     
     # 启动中枢
     dispatcher.start()

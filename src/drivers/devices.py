@@ -87,6 +87,23 @@ class FreezeDriedFeederDriver(SimulatorDriver, DeviceMixin):
             
         return self._execute_with_lock("feed_freeze", task)
 
+class IntegratedAppDriver(SimulatorDriver, DeviceMixin):
+    """整合APP (模拟器)"""
+    def __init__(self, name: str, app_package: str):
+        SimulatorDriver.__init__(self, name, app_package=app_package)
+        DeviceMixin.__init__(self)
+
+    def execute(self, cmd_type: str, args: Dict[str, Any] = None) -> bool:
+        if not self.is_connected:
+            return False
+            
+        def task():
+            self.logger.info(f"[{self.name}] >>> 整合APP执行操作: {cmd_type}...")
+            time.sleep(1.5)
+            self.logger.info(f"[{self.name}] <<< 操作完成")
+            
+        return self._execute_with_lock(cmd_type, task)
+
 class CannedFeederDriver(IoTDriver, DeviceMixin):
     """猫罐喂食器"""
     def __init__(self, name: str, host: str, port: int):
