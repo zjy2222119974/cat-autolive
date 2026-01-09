@@ -1,14 +1,21 @@
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QGraphicsDropShadowEffect
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QColor, QCursor
 
 class DeviceCard(QFrame):
     """设备状态卡片 - 紧凑型设计"""
     
+    # 定义点击信号
+    clicked = pyqtSignal(str, str)  # 参数: (driver_name, device_type)
+    
     def __init__(self, name: str, device_type: str, driver=None, parent=None):
         super().__init__(parent)
         self.driver = driver
+        self.device_type = device_type
         self.setFixedSize(240, 120)  # Fixed size for stability in FlowLayout
+        
+        # 设置鼠标指针为手型
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
         # 允许右键菜单
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -176,3 +183,19 @@ class DeviceCard(QFrame):
         if self.driver:
             self.driver.disconnect()
             self.update_status()
+    
+    def mousePressEvent(self, event):
+        """处理鼠标点击事件"""
+        import logging
+        logger = logging.getLogger()
+        logger.info(f"[DeviceCard] mousePressEvent triggered, button: {event.button()}")
+        
+        if event.button() == Qt.MouseButton.LeftButton:
+            if self.driver:
+                logger.info(f"[DeviceCard] Emitting clicked signal: {self.driver.name}, {self.device_type}")
+                # 发射点击信号，传递驱动名称和设备类型
+                self.clicked.emit(self.driver.name, self.device_type)
+            else:
+                logger.warning("[DeviceCard] No driver attached to this card")
+        super().mousePressEvent(event)
+

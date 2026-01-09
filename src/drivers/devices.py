@@ -75,16 +75,70 @@ class FreezeDriedFeederDriver(SimulatorDriver, DeviceMixin):
     def __init__(self, name: str, app_package: str):
         SimulatorDriver.__init__(self, name, app_package=app_package)
         DeviceMixin.__init__(self)
+        self._automation = None
+        self._ocr_detector = None
+        self._click_simulator = None
+    
+    def _init_automation(self):
+        """初始化自动化组件"""
+        if self._automation is not None:
+            return
+        
+        try:
+            from src.utils.ocr_utils import OCRDetector
+            from src.utils.click_simulator import ClickSimulator
+            from src.automation.feeder_automation import FreezeDriedFeederAutomation
+            
+            self.logger.info(f"[{self.name}] 初始化OCR自动化组件...")
+            self._ocr_detector = OCRDetector()
+            self._click_simulator = ClickSimulator()
+            self._automation = FreezeDriedFeederAutomation(self._ocr_detector, self._click_simulator)
+            self.logger.info(f"[{self.name}] 自动化组件初始化完成")
+        except Exception as e:
+            self.logger.error(f"[{self.name}] 自动化组件初始化失败: {e}")
+            self._automation = None
 
     def execute(self, cmd_type: str, args: Dict[str, Any] = None) -> bool:
         if not self.is_connected:
             return False
-            
+        
+        # 初始化自动化组件
+        if self._automation is None:
+            self._init_automation()
+        
+        # 如果自动化组件初始化失败，使用默认行为
+        if self._automation is None:
+            def task():
+                self.logger.info(f"[{self.name}] >>> 触发冻干投喂...")
+                time.sleep(2)
+                self.logger.info(f"[{self.name}] <<< 冻干掉落")
+            return self._execute_with_lock("feed_freeze", task)
+        
+        # 使用OCR自动化
         def task():
-            self.logger.info(f"[{self.name}] >>> 触发冻干投喂...")
-            time.sleep(2)
-            self.logger.info(f"[{self.name}] <<< 冻干掉落")
-            
+            try:
+                self.logger.info(f"[{self.name}] >>> 开始自动喂食流程...")
+                
+                # 获取窗口句柄
+                if not hasattr(self, 'hwnd') or not self.hwnd:
+                    self.logger.error(f"[{self.name}] 未绑定窗口，无法执行自动化")
+                    return
+                
+                # 执行喂食
+                success = self._automation.feed(
+                    hwnd=self.hwnd,
+                    capture_func=self.capture_window,
+                    portions=1
+                )
+                
+                if success:
+                    self.logger.info(f"[{self.name}] <<< 自动喂食完成")
+                else:
+                    self.logger.error(f"[{self.name}] <<< 自动喂食失败")
+                    
+            except Exception as e:
+                self.logger.error(f"[{self.name}] 自动化执行异常: {e}")
+        
         return self._execute_with_lock("feed_freeze", task)
 
 class IntegratedAppDriver(SimulatorDriver, DeviceMixin):

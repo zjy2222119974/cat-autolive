@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
     def _init_pages(self):
         """初始化所有页面"""
         self.pages = [
-            HubPage(self.dispatcher),
+            HubPage(self.dispatcher, main_window=self),
             EmulatorPage(self.dispatcher),
             IoTPage(self.dispatcher),
             PlatformPage(),
@@ -195,6 +195,11 @@ class MainWindow(QMainWindow):
         add_iot_action = QAction("物联网", self)
         add_iot_action.setEnabled(False) # 暂未实现
         add_controller_menu.addAction(add_iot_action)
+        
+        # 编辑控制器菜单项
+        edit_controller_action = QAction("编辑控制器", self)
+        edit_controller_action.triggered.connect(self._show_edit_controller_dialog)
+        menu_action.addAction(edit_controller_action)
         
         # 测试弹幕子菜单
         mock_menu = menu_action.addMenu("测试弹幕")
@@ -363,5 +368,107 @@ class MainWindow(QMainWindow):
                     
                 self.logger.info(f"成功添加模拟器: {name} [{type_label}]")
                 self.statusBar().showMessage(f"已添加设备: {name}")
+    
+    def _show_edit_controller_dialog(self):
+        """显示编辑控制器对话框"""
+        from src.ui.dialogs.edit_controller_dialog import EditControllerDialog
+        from src.utils.device_manager import update_device, delete_device, create_driver
+        from PyQt6.QtWidgets import QMessageBox
+        
+        dialog = EditControllerDialog(self.dispatcher, self)
+        if dialog.exec():
+            data = dialog.get_data()
+            
+            if not data:
+                return
+            
+            # 处理删除操作
+            if data.get('action') == 'delete':
+                original_name = data['original_name']
+                
+                # 从调度器注销
+                if self.dispatcher and original_name in self.dispatcher.drivers:
+                    self.dispatcher.unregister_driver(original_name)
+                
+                # 从配置文件删除
+                delete_device(original_name)
+                
+                # 刷新UI
+                self._refresh_pages()
+                
+                self.logger.info(f"已删除控制器: {original_name}")
+                self.statusBar().showMessage(f"已删除设备: {original_name}")
+                return
+            
+            # 处理编辑/更新操作
+            original_name = data['original_name']
+            new_name = data['new_name']
+            config = data['config']
+            
+            # 更新配置文件
+            update_device(original_name, new_name, config)
+            self.logger.info(f"已更新设备配置: {original_name} -> {new_name}")
+            
+            # 更新调度器
+            if self.dispatcher:
+                # 如果名称或类型改变，需要重新创建驱动
+                if original_name in self.dispatcher.drivers:
+                    old_config = self.dispatcher.drivers[original_name].get_config() if hasattr(self.dispatcher.drivers[original_name], 'get_config') else {}
+                    
+                    # 注销旧驱动
+                    self.dispatcher.unregister_driver(original_name)
+                    
+                    # 创建新驱动
+                    driver = create_driver(new_name, config)
+                    if driver:
+                        self.dispatcher.register_driver(new_name, driver)
+                        self.logger.info(f"已重新注册驱动: {new_name}")
+            
+            # 刷新UI
+            self._refresh_pages()
+            
+            self.statusBar().showMessage(f"已更新设备: {new_name}")
+    
+    def _refresh_pages(self):
+        """刷新所有页面"""
+        # HubPage (Index 0)
+        if len(self.pages) > 0 and hasattr(self.pages[0], 'refresh_devices'):
+            self.pages[0].refresh_devices()
+        
+        # EmulatorPage (Index 1)
+        if len(self.pages) > 1 and hasattr(self.pages[1], 'refresh_all'):
+            self.pages[1].refresh_all()
+        
+        # IoTPage (Index 2)
+        if len(self.pages) > 2 and hasattr(self.pages[2], 'refresh_all'):
+            self.pages[2].refresh_all()
+    
+    def navigate_to_device(self, driver_name: str, device_type: str):
+        """导航到指定设备的控制器页面
+        
+        Args:
+            driver_name: 驱动名称
+            device_type: 设备类型 ("模拟器" 或 "物联网")
+        """
+        if device_type == "模拟器":
+            # 跳转到模拟器页面 (Index 1)
+            self.nav_list.setCurrentRow(1)
+            self.content_stack.setCurrentIndex(1)
+            
+            # 如果 EmulatorPage 有选择设备的方法，调用它
+            if len(self.pages) > 1 and hasattr(self.pages[1], 'select_device'):
+                self.pages[1].select_device(driver_name)
+                
+        elif device_type == "物联网":
+            # 跳转到物联网页面 (Index 2)
+            self.nav_list.setCurrentRow(2)
+            self.content_stack.setCurrentIndex(2)
+            
+            # 如果 IoTPage 有选择设备的方法，调用它
+            if len(self.pages) > 2 and hasattr(self.pages[2], 'select_device'):
+                self.pages[2].select_device(driver_name)
+        
+        self.logger.info(f"导航到设备: {driver_name} ({device_type})")
+        self.statusBar().showMessage(f"已跳转到: {driver_name}")
 
 

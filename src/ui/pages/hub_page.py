@@ -14,9 +14,10 @@ class HubPage(QWidget):
     
     
     
-    def __init__(self, dispatcher=None):
+    def __init__(self, dispatcher=None, main_window=None):
         super().__init__()
         self.dispatcher = dispatcher
+        self.main_window = main_window
         self.mock_file = "mockData/mockDanmaku.txt"  # 默认弹幕文件
         self._init_ui()
         
@@ -163,6 +164,9 @@ class HubPage(QWidget):
                 card = DeviceCard(display_name, real_type, driver)
                 self.device_cards.append(card)
                 
+                # 连接点击信号
+                card.clicked.connect(self._on_device_clicked)
+                
                 self.flow_layout.addWidget(card)
                     
         layout.addWidget(scroll_area, 1)
@@ -281,6 +285,9 @@ class HubPage(QWidget):
             card = DeviceCard(display_name, real_type, driver)
             self.device_cards.append(card)
             
+            # 连接点击信号
+            card.clicked.connect(self._on_device_clicked)
+            
             self.grid_layout.addWidget(card, row, col)
             
             col += 1
@@ -339,124 +346,17 @@ class HubPage(QWidget):
         logging.info("正在断开连接...") # Changed from self.log_console.append
         
         self.dispatcher.stop_mock_stream()
+    
+    def _on_device_clicked(self, driver_name: str, device_type: str):
+        """处理设备卡片点击事件，跳转到对应的控制器页面"""
+        logging.info(f"[HubPage] Device clicked: {driver_name}, type: {device_type}")
+        if self.main_window:
+            logging.info(f"[HubPage] Calling main_window.navigate_to_device")
+            self.main_window.navigate_to_device(driver_name, device_type)
+        else:
+            logging.warning(f"[HubPage] main_window is None, cannot navigate")
         
-    def _init_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
-        
-        # 1. 标题
-        title = QLabel("中枢控制台")
-        title.setStyleSheet("font-size: 20px; font-weight: bold; color: #d4d4d4;")
-        layout.addWidget(title)
-        
-        # 2. 设备网格区域
-        # 使用 FlowLayout 或者简单的 GridLayout
-        # 这里为了简单对齐，使用 GridLayout
-        
-        grid_widget = QWidget()
-        self.grid_layout = QGridLayout(grid_widget)
-        self.grid_layout.setSpacing(20)
-        self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        
-        self.refresh_devices()
-                    
-        layout.addWidget(grid_widget)
-                    
-        layout.addWidget(grid_widget)
-        
-        # 弹簧
-        layout.addStretch()
-        
-        # 4. 控制按钮区域（底部）
-        btn_layout = QHBoxLayout()
-        btn_layout.setSpacing(20)
-        
-        self.btn_connect = QPushButton("连接直播间 (模拟)")
-        self.btn_connect.setFixedSize(150, 40)
-        self.btn_connect.setStyleSheet("""
-            QPushButton {
-                background-color: #007acc;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #0062a3;
-            }
-            QPushButton:disabled {
-                background-color: #2d2d30;
-                color: #555555;
-            }
-        """)
-        self.btn_connect.clicked.connect(self._on_connect_clicked)
-        btn_layout.addWidget(self.btn_connect)
-        
-        self.btn_disconnect = QPushButton("断开连接")
-        self.btn_disconnect.setFixedSize(120, 40)
-        self.btn_disconnect.setStyleSheet("""
-            QPushButton {
-                background-color: #d83b01;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #a82e01;
-            }
-            QPushButton:disabled {
-                background-color: #2d2d30;
-                color: #555555;
-            }
-        """)
-        self.btn_disconnect.clicked.connect(self._on_disconnect_clicked)
-        self.btn_disconnect.setEnabled(False)
-        btn_layout.addWidget(self.btn_disconnect)
-        
-        btn_layout.addStretch()
-        layout.addLayout(btn_layout)
-        
-        # 5. 日志区域 (三列布局)
-        log_layout = QHBoxLayout()
-        
-        # 5.1 系统日志
-        sys_log_group = QGroupBox("💻 系统日志")
-        sys_layout = QVBoxLayout()
-        self.sys_console = QTextEdit()
-        self.sys_console.setReadOnly(True)
-        self.sys_console.setStyleSheet("background-color: #1e1e1e; color: #d4d4d4; font-family: Consolas;")
-        sys_layout.addWidget(self.sys_console)
-        sys_log_group.setLayout(sys_layout)
-        log_layout.addWidget(sys_log_group, 1) # 比例 1
-        
-        # 5.2 弹幕/互动日志
-        dm_log_group = QGroupBox("💬 直播间弹幕")
-        dm_layout = QVBoxLayout()
-        self.dm_console = QTextEdit()
-        self.dm_console.setReadOnly(True)
-        self.dm_console.setStyleSheet("background-color: #1e1e1e; color: #569cd6; font-family: 'Microsoft YaHei UI';")
-        dm_layout.addWidget(self.dm_console)
-        dm_log_group.setLayout(dm_layout)
-        log_layout.addWidget(dm_log_group, 1) # 比例 1
-        
-        # 5.3 硬件设备日志
-        dev_log_group = QGroupBox("🤖 设备执行")
-        dev_layout = QVBoxLayout()
-        self.dev_console = QTextEdit()
-        self.dev_console.setReadOnly(True)
-        self.dev_console.setStyleSheet("background-color: #1e1e1e; color: #4ec9b0; font-family: Consolas;")
-        dev_layout.addWidget(self.dev_console)
-        dev_log_group.setLayout(dev_layout)
-        log_layout.addWidget(dev_log_group, 1) # 比例 1
-        
-        layout.addLayout(log_layout)
-        
-        # 设置窗口日志处理
-        self.log_handler = QtLogHandler(self.sys_console, self.dm_console, self.dev_console)
-        self.log_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
-        logging.getLogger().addHandler(self.log_handler)
+
 
 class QtLogHandler(logging.Handler):
     """自定义日志处理器，支持多列分发"""
@@ -482,3 +382,4 @@ class QtLogHandler(logging.Handler):
     def _append_to_widget(self, widget, msg):
         # 必须在主线程更新 UI
         QMetaObject.invokeMethod(widget, "append", Qt.ConnectionType.QueuedConnection, Q_ARG(str, msg))
+

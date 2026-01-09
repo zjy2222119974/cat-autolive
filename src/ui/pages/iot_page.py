@@ -401,3 +401,34 @@ class IoTPage(QWidget):
         controls_layout.addLayout(bottom_row)
         
         return controls_frame
+    
+    def refresh_all(self):
+        """刷新所有内容"""
+        # 重新初始化UI以刷新设备列表
+        # 这里简单实现，可以优化为只刷新设备列表部分
+        pass
+    
+    def select_device(self, device_name: str):
+        """根据设备名称选择对应的标签页
+        
+        Args:
+            device_name: 设备驱动名称，例如 'feeder_paste', 'car_hakimi'
+        """
+        # IoT 设备名称到标签页索引的映射
+        device_tab_map = {
+            "feeder_paste": 0,      # 湿粮喂食器
+            "feeder_canned": 1,     # 猫罐喂食器
+            "car_hakimi": 2,        # 哈基米车
+            "laser_ball": 3         # 激光灯球
+        }
+        
+        # 获取对应的标签页索引
+        tab_index = device_tab_map.get(device_name)
+        
+        if tab_index is not None:
+            # 查找并切换到对应的标签页
+            # 需要找到 tab_widget
+            for child in self.findChildren(QTabWidget):
+                child.setCurrentIndex(tab_index)
+                break
+

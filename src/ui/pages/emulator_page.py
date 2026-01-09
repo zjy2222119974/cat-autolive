@@ -6,6 +6,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
+import logging
+
+logger = logging.getLogger(__name__)
 
 class EmulatorPage(QWidget):
     """模拟器控制器页面"""
@@ -294,6 +297,7 @@ class EmulatorPage(QWidget):
             }
         """)
         feed_button.setMinimumHeight(45)
+        feed_button.clicked.connect(self._on_manual_feed_clicked)
         layout.addWidget(feed_button)
         
         # 添加弹性空间，将控件推到顶部
@@ -417,8 +421,14 @@ class EmulatorPage(QWidget):
             "laser_ball": "激光灯球"
         }
         
-        for name, driver in self.dispatcher.drivers.items():
-            if isinstance(driver, SimulatorDriver):
+        # 获取所有模拟器设备并按名称排序，确保标签页顺序一致
+        simulator_devices = sorted(
+            [(name, driver) for name, driver in self.dispatcher.drivers.items()
+             if isinstance(driver, SimulatorDriver)],
+            key=lambda x: x[0]
+        )
+        
+        for name, driver in simulator_devices:
                 display_name = name_map.get(name, name)
                 
                 # 创建简单的标签页内容（只有显示区域）
@@ -746,5 +756,82 @@ class EmulatorPage(QWidget):
         
         # 刷新设备列表状态（显示红点）
         self.refresh_devices_list()
+
+    def select_device(self, device_name: str):
+        """根据设备名称选择对应的标签页
+        
+        Args:
+            device_name: 设备驱动名称，例如 'feeder_freeze_dried'
+        """
+        import logging
+        logger = logging.getLogger()
+        logger.info(f"[EmulatorPage] select_device called with: {device_name}")
+        
+        if not self.dispatcher:
+            logger.warning("[EmulatorPage] No dispatcher available")
+            return
+        
+        from src.drivers.simulator_driver import SimulatorDriver
+        
+        # 获取所有模拟器设备列表（按字典顺序排序，确保与标签页顺序一致）
+        simulator_drivers = sorted(
+            [(name, driver) for name, driver in self.dispatcher.drivers.items() 
+             if isinstance(driver, SimulatorDriver)],
+            key=lambda x: x[0]
+        )
+        
+        logger.info(f"[EmulatorPage] Found {len(simulator_drivers)} simulator devices")
+        for idx, (name, _) in enumerate(simulator_drivers):
+            logger.info(f"[EmulatorPage]   Index {idx}: {name}")
+        
+        # 查找设备在列表中的索引
+        for index, (name, driver) in enumerate(simulator_drivers):
+            if name == device_name:
+                # 切换到对应的标签页
+                if hasattr(self, 'tab_widget'):
+                    logger.info(f"[EmulatorPage] Switching to tab index {index} for device {device_name}")
+                    self.tab_widget.setCurrentIndex(index)
+                else:
+                    logger.warning("[EmulatorPage] tab_widget not found")
+                break
+        else:
+            logger.warning(f"[EmulatorPage] Device {device_name} not found in simulator list")
+    
+    def _on_manual_feed_clicked(self):
+        """手动出粮按钮点击事件"""
+        logger.info("[EmulatorPage] ========== 手动出粮按钮被点击 ==========")
+        
+        # 获取当前标签页对应的设备
+        device_name = self._get_current_device_name()
+        logger.info(f"[EmulatorPage] 当前设备: {device_name}")
+        
+        if not device_name:
+            logger.warning("[EmulatorPage] 未选择设备")
+            return
+        
+        # 获取设备驱动
+        if not self.dispatcher:
+            logger.error("[EmulatorPage] dispatcher 为 None")
+            return
+            
+        if device_name not in self.dispatcher.drivers:
+            logger.warning(f"[EmulatorPage] 设备 {device_name} 不存在于 drivers 中")
+            logger.info(f"[EmulatorPage] 可用设备: {list(self.dispatcher.drivers.keys())}")
+            return
+        
+        driver = self.dispatcher.drivers[device_name]
+        logger.info(f"[EmulatorPage] 获取到驱动: {type(driver).__name__}")
+        
+        # 调用设备的 execute 方法触发喂食
+        logger.info(f"[EmulatorPage] 手动触发设备 {device_name} 喂食")
+        result = driver.execute("feed")
+        logger.info(f"[EmulatorPage] execute 返回结果: {result}")
+
+
+
+
+
+
+
 
 
