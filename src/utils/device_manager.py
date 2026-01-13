@@ -94,16 +94,23 @@ def get_driver_type_from_label(label: str) -> str:
     }
     return label_mapping.get(label, label)
 
-def create_driver(name: str, config: dict):
+def create_driver(name: str, config: dict, ocr_detector=None):
     """Factory to create driver instance from config."""
     driver_type = config.get("type")
+    
+    # common settings for simulators
+    target_width = config.get("target_width", 720)
+    target_height = config.get("target_height", 1280)
+    dpi = config.get("dpi", 320)
     
     if driver_type == "PasteFeederDriver":
         return PasteFeederDriver(name, host=config.get("host"), port=config.get("port"))
     elif driver_type == "KibbleFeederDriver":
-        return KibbleFeederDriver(name, app_package=config.get("app_package"))
+        return KibbleFeederDriver(name, app_package=config.get("app_package"), 
+                                 target_width=target_width, target_height=target_height, dpi=dpi)
     elif driver_type == "FreezeDriedFeederDriver":
-        return FreezeDriedFeederDriver(name, app_package=config.get("app_package"))
+        return FreezeDriedFeederDriver(name, app_package=config.get("app_package"), ocr_detector=ocr_detector,
+                                      target_width=target_width, target_height=target_height, dpi=dpi)
     elif driver_type == "CannedFeederDriver":
         return CannedFeederDriver(name, host=config.get("host"), port=config.get("port"))
     elif driver_type == "HakimiCarDriver":
@@ -111,6 +118,7 @@ def create_driver(name: str, config: dict):
     elif driver_type == "LaserBallDriver":
         return LaserBallDriver(name, host=config.get("host"), port=config.get("port"))
     elif driver_type == "IntegratedAppDriver":
-        return IntegratedAppDriver(name, app_package=config.get("app_package"))
+        return IntegratedAppDriver(name, app_package=config.get("app_package"), ocr_detector=ocr_detector,
+                                  target_width=target_width, target_height=target_height, dpi=dpi)
     
     return None

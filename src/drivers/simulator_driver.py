@@ -11,10 +11,17 @@ class SimulatorDriver(BaseDriver):
     用于控制安卓模拟器或APP
     """
     
-    def __init__(self, name: str, app_package: str = None, window_title: str = None):
+    def __init__(self, name: str, app_package: str = None, window_title: str = None, 
+                 target_width: int = 720, target_height: int = 1280, dpi: int = 320):
         super().__init__(name)
         self.app_package = app_package
         self.window_title = window_title
+        
+        # 存储分辨率设置
+        self.target_width = target_width
+        self.target_height = target_height
+        self.dpi = dpi
+        
         self._connected = False
         
     def connect(self, hwnd: int = None) -> bool:

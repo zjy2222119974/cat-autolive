@@ -14,6 +14,74 @@ class OCRDetector:
         """初始化OCR检测器（使用PaddleOCR）"""
         self.reader = None
         self._init_reader()
+
+    def _parse_results(self, results) -> List[Tuple[List, str, float]]:
+        """解析OCR结果，兼容不同版本的返回格式"""
+        if not results:
+            return []
+            
+        parsed_data = []
+        
+        # 检查是否为新版格式 (list of dicts)
+        # 例如: [{'dt_polys': [array...], 'rec_text': 'Hello', 'rec_score': 0.99}, ...]
+        if isinstance(results, list) and len(results) > 0 and isinstance(results[0], dict):
+            # Check for parallel list format (PP-OCRv4 / Structure format)
+            # e.g. [{'rec_texts': ['...'], 'rec_scores': [...], 'dt_polys': [...]}]
+            if 'rec_texts' in results[0] and isinstance(results[0]['rec_texts'], list):
+                # Parallel lists format
+                for page in results:
+                    texts = page.get('rec_texts', [])
+                    scores = page.get('rec_scores', [])
+                    boxes = page.get('dt_polys', []) if 'dt_polys' in page else page.get('rec_boxes', [])
+                    
+                    # Ensure all lists have the same length
+                    min_len = min(len(texts), len(scores), len(boxes))
+                    
+                    for i in range(min_len):
+                        text = texts[i]
+                        confidence = float(scores[i])
+                        poly = boxes[i]
+                        
+                        bbox = []
+                        if hasattr(poly, 'tolist'):
+                            bbox = poly.tolist()
+                        else:
+                            bbox = poly
+                            
+                        parsed_data.append((bbox, text, confidence))
+                        
+            else:
+                # List of dicts format (one dict per line)
+                # e.g. [{'rec_text': '...', ...}, {'rec_text': '...', ...}]
+                for item in results:
+                    text = item.get('rec_text', '')
+                    confidence = float(item.get('rec_score', 0.0))
+                    
+                    bbox = []
+                    if 'dt_polys' in item and len(item['dt_polys']) > 0:
+                        poly = item['dt_polys'][0]
+                        if hasattr(poly, 'tolist'):
+                            bbox = poly.tolist()
+                        else:
+                            bbox = poly
+                    
+                    parsed_data.append((bbox, text, confidence))
+                
+        # 检查是否为旧版格式 (list of pages -> list of items -> [bbox, (text, conf)])
+        elif isinstance(results, list) and len(results) > 0:
+            # 尝试获取第一页
+            page = results[0]
+            # 如果page是列表且包含内容
+            if isinstance(page, list) and len(page) > 0:
+                # 检查项目结构
+                item = page[0]
+                # 匹配格式 [bbox, (text, conf)]
+                if isinstance(item, (list, tuple)) and len(item) == 2 and isinstance(item[1], (list, tuple)):
+                    for entry in page:
+                        bbox, (text, confidence) = entry
+                        parsed_data.append((bbox, text, confidence))
+            
+        return parsed_data
     
     def _init_reader(self):
         """初始化PaddleOCR引擎"""
@@ -23,8 +91,7 @@ class OCRDetector:
             self.reader = PaddleOCR(
                 use_angle_cls=True,  # 使用方向分类器
                 lang='ch',           # 中文
-                use_gpu=False,       # 使用CPU
-                show_log=False       # 不显示详细日志
+                ocr_version='PP-OCRv4', # 强制使用v4版本（默认通常是Mobile）
             )
             logger.info("PaddleOCR引擎初始化完成")
         except Exception as e:
@@ -89,10 +156,16 @@ class OCRDetector:
         
         try:
             # 执行OCR识别
-            results = self.reader.readtext(image)
+            # PaddleOCR 使用 .ocr() 方法，而不是 .readtext()
+            # cls=True 启用方向分类
+            results = self.reader.ocr(image)
+            
+            # 解析结果
+            parsed_results = self._parse_results(results)
             
             matches = []
-            for (bbox, text, confidence) in results:
+            for bbox, text, confidence in parsed_results:
+                
                 # 检查是否包含任何关键词
                 for keyword in keywords:
                     if keyword in text and confidence >= confidence_threshold:
@@ -130,17 +203,18 @@ class OCRDetector:
         
         try:
             # 使用PaddleOCR进行识别
-            results = self.reader.ocr(image, cls=True)
-            # PaddleOCR返回格式: [[[bbox], (text, confidence)], ...]
-            if not results or not results[0]:
+            results = self.reader.ocr(image)
+            
+            # 解析结果
+            parsed_results = self._parse_results(results)
+            if not parsed_results:
                 return None
-            results = results[0]  # 获取第一页的结果
             
             # 去除目标文字的空格，用于匹配
             target_text_stripped = target_text.replace(" ", "").replace("\u3000", "")
             
-            for item in results:
-                bbox, (text, confidence) = item
+            for item in parsed_results:
+                bbox, text, confidence = item
                 
                 # 去除识别文字的空格
                 text_stripped = text.replace(" ", "").replace("\u3000", "")
@@ -188,15 +262,13 @@ class OCRDetector:
         
         try:
             # 使用PaddleOCR进行识别
-            results = self.reader.ocr(image, cls=True)
-            # PaddleOCR返回格式: [[[bbox], (text, confidence)], ...]
-            if not results or not results[0]:
-                return []
-            results = results[0]  # 获取第一页的结果
+            results = self.reader.ocr(image)
+            
+            # 解析结果
+            parsed_results = self._parse_results(results)
             
             all_text = []
-            for item in results:
-                bbox, (text, confidence) = item
+            for bbox, text, confidence in parsed_results:
                 
                 bbox_array = np.array(bbox)
                 center_x = int(np.mean(bbox_array[:, 0]))

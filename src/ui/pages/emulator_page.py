@@ -97,11 +97,12 @@ class EmulatorPage(QWidget):
         
         # 左侧：实时画面区域（带标签页）
         preview_area = self._create_preview_area()
-        layout.addWidget(preview_area, 3)  # 占60%宽度
+        layout.addWidget(preview_area)  # 自动占据剩余空间
         
         # 右侧：控制面板区域
         control_panel = self._create_control_panel()
-        layout.addWidget(control_panel, 2)  # 占40%宽度
+        control_panel.setFixedWidth(350) # 固定宽度
+        layout.addWidget(control_panel)
         
         return section
     
@@ -380,14 +381,19 @@ class EmulatorPage(QWidget):
                 "laser_ball": "激光灯球"
             }
             
-            # 列出所有模拟器设备
+            # 列出所有模拟器设备 (按名称排序)
+            simulator_drivers = sorted(
+                [(name, driver) for name, driver in self.dispatcher.drivers.items() 
+                 if isinstance(driver, SimulatorDriver)],
+                key=lambda x: x[0]
+            )
+            
             found = False
-            for name, driver in self.dispatcher.drivers.items():
-                if isinstance(driver, SimulatorDriver):
-                    found = True
-                    display_name = name_map.get(name, name)
-                    card = DeviceCard(display_name, "模拟器", driver)
-                    self.devices_layout.addWidget(card)
+            for name, driver in simulator_drivers:
+                found = True
+                display_name = name_map.get(name, name)
+                card = DeviceCard(display_name, "模拟器", driver)
+                self.devices_layout.addWidget(card)
             
             if not found:
                 no_device_label = QLabel("未检测到模拟器设备")
@@ -505,8 +511,11 @@ class EmulatorPage(QWidget):
         
         from src.drivers.simulator_driver import SimulatorDriver
         
-        simulator_drivers = [(name, driver) for name, driver in self.dispatcher.drivers.items() 
-                            if isinstance(driver, SimulatorDriver)]
+        simulator_drivers = sorted(
+            [(name, driver) for name, driver in self.dispatcher.drivers.items() 
+             if isinstance(driver, SimulatorDriver)],
+            key=lambda x: x[0]
+        )
         
         if current_tab_index >= len(simulator_drivers):
             return None
@@ -562,7 +571,47 @@ class EmulatorPage(QWidget):
         from src.utils.window_capture import WindowCapture
         from src.drivers.simulator_driver import SimulatorDriver
         
-        # 获取当前选中的窗口
+        # 1. 获取当前标签页对应的设备
+        current_tab_index = self.tab_widget.currentIndex()
+        if current_tab_index < 0:
+            return
+            
+        if not self.dispatcher:
+            return
+
+        # 找到当前 tab 对应的 driver (按名称排序)
+        simulator_drivers = sorted(
+            [(name, driver) for name, driver in self.dispatcher.drivers.items() 
+             if isinstance(driver, SimulatorDriver)],
+            key=lambda x: x[0]
+        )
+        
+        if current_tab_index >= len(simulator_drivers):
+            return
+        
+        device_name, driver = simulator_drivers[current_tab_index]
+        
+        # 2. 检查是否已经在投射，如果是，则先停止并刷新
+        if device_name in self.capture_timers:
+            logger.info(f"[{device_name}] 已在投射中，执行重启流程 (停止->刷新->重新投射)")
+            
+            # 保存当前选中的窗口标题，以便刷新后恢复
+            current_window_title = self.window_combo.currentText()
+            
+            # 停止投射
+            self._stop_capture()
+            
+            # 刷新窗口列表
+            self._refresh_windows()
+            
+            # 尝试恢复选择
+            idx = self.window_combo.findText(current_window_title)
+            if idx >= 0:
+                self.window_combo.setCurrentIndex(idx)
+            else:
+                logger.warning(f"刷新后未找到原窗口: {current_window_title}，保留默认选择")
+
+        # 3. 获取当前选中的窗口 (此时列表已刷新)
         idx = self.window_combo.currentIndex()
         if idx < 0:
             return
@@ -571,46 +620,29 @@ class EmulatorPage(QWidget):
         if not hwnd:
             return
         
-        # 获取当前激活的标签页索引
-        current_tab_index = self.tab_widget.currentIndex()
-        if current_tab_index < 0:
-            return
-        
-        # 获取当前标签页对应的设备名称
-        if not hasattr(self, 'tab_containers') or not self.dispatcher:
-            return
-        
-        # 找到当前 tab 对应的 driver
-        simulator_drivers = [(name, driver) for name, driver in self.dispatcher.drivers.items() 
-                            if isinstance(driver, SimulatorDriver)]
-        
-        if current_tab_index >= len(simulator_drivers):
-            return
-        
-        device_name, driver = simulator_drivers[current_tab_index]
-        
-        # 更新驱动状态（连接）
-        driver.connect(hwnd=hwnd)
-        
         # 获取对应的显示容器
-        if device_name not in self.tab_containers:
+        if not hasattr(self, 'tab_containers') or device_name not in self.tab_containers:
             return
-        
+            
         display_container = self.tab_containers[device_name]
         layout = display_container.layout()
         
-        # 清除旧内容
-        while layout.count():
-            item = layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        
-        # 停止之前的定时器（如果有）
-        if device_name in self.capture_timers:
-            self.capture_timers[device_name].stop()
-            del self.capture_timers[device_name]
-        
+        # 4. 执行投射逻辑
         try:
+            # 更新驱动状态（连接）
+            driver.connect(hwnd=hwnd)
+            
+            # 清除显示区域旧内容
+            while layout.count():
+                item = layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+            
+            # 再次确认停止旧定时器（防御性编程）
+            if device_name in self.capture_timers:
+                self.capture_timers[device_name].stop()
+                del self.capture_timers[device_name]
+            
             # 创建窗口捕捉对象
             capture = WindowCapture(hwnd)
             self.capture_objects[device_name] = capture
@@ -659,6 +691,14 @@ class EmulatorPage(QWidget):
             
         except Exception as e:
             # 如果失败，显示错误信息
+            logger.error(f"投射失败: {e}", exc_info=True)
+            
+            # 尝试清理界面
+            while layout.count():
+                item = layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+                    
             error_label = QLabel(f"投射失败: {str(e)}")
             error_label.setStyleSheet("color: #ff4d4f; font-size: 14px;")
             error_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -696,8 +736,12 @@ class EmulatorPage(QWidget):
         from src.drivers.simulator_driver import SimulatorDriver
         
         # 找到当前 tab 对应的 driver
-        simulator_drivers = [(name, driver) for name, driver in self.dispatcher.drivers.items() 
-                            if isinstance(driver, SimulatorDriver)]
+        # 找到当前 tab 对应的 driver (按名称排序)
+        simulator_drivers = sorted(
+            [(name, driver) for name, driver in self.dispatcher.drivers.items() 
+             if isinstance(driver, SimulatorDriver)],
+            key=lambda x: x[0]
+        )
         
         if current_tab_index >= len(simulator_drivers):
             return

@@ -90,6 +90,27 @@ class Dispatcher:
             driver_name, 
             lambda: self._recover_driver(driver)
         )
+        
+    def unregister_driver(self, driver_name: str):
+        """注销驱动"""
+        if driver_name in self.drivers:
+            # 尝试断开连接
+            try:
+                self.drivers[driver_name].disconnect()
+            except Exception:
+                pass
+            del self.drivers[driver_name]
+            
+        if driver_name in self.queues:
+            del self.queues[driver_name]
+            
+        if driver_name in self.device_busy_until:
+            del self.device_busy_until[driver_name]
+            
+        if driver_name in self.device_current_user:
+            del self.device_current_user[driver_name]
+            
+        self.logger.info(f"已注销驱动: {driver_name}")
     
     def _recover_driver(self, driver: BaseDriver) -> bool:
         """驱动恢复逻辑"""

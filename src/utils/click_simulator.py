@@ -67,7 +67,7 @@ class ClickSimulator:
     
     @staticmethod
     def click_at_position(hwnd: int, x: int, y: int, delay: float = 0.1):
-        """在窗口的指定位置点击（客户区坐标）
+        """在窗口的指定位置点击（后台静默点击）
         
         Args:
             hwnd: 窗口句柄
@@ -76,33 +76,21 @@ class ClickSimulator:
             delay: 点击后延迟时间（秒）
         """
         try:
-            # 转换为屏幕坐标
-            screen_x, screen_y = ClickSimulator.client_to_screen(hwnd, x, y)
+            # 使用 PostMessage 发送后台点击消息，不移动鼠标
+            lparam = (y << 16) | (x & 0xFFFF)
             
-            logger.info(f"点击位置: 客户区({x}, {y}) -> 屏幕({screen_x}, {screen_y})")
+            logger.info(f"后台点击: HWND={hwnd} Pos=({x}, {y})")
             
-            # 保存当前鼠标位置
-            old_pos = win32api.GetCursorPos()
-            
-            # 移动鼠标到目标位置
-            win32api.SetCursorPos((screen_x, screen_y))
+            # 发送鼠标按下和松开消息
+            win32gui.PostMessage(hwnd, win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, lparam)
             time.sleep(0.05)
-            
-            # 模拟鼠标左键按下和释放
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, screen_x, screen_y, 0, 0)
-            time.sleep(0.05)
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, screen_x, screen_y, 0, 0)
+            win32gui.PostMessage(hwnd, win32con.WM_LBUTTONUP, 0, lparam)
             
             # 延迟
             time.sleep(delay)
             
-            # 恢复鼠标位置
-            win32api.SetCursorPos(old_pos)
-            
-            logger.info(f"点击完成")
-            
         except Exception as e:
-            logger.error(f"点击失败: {e}")
+            logger.error(f"后台点击失败: {e}")
     
     @staticmethod
     def click_at_screen_position(screen_x: int, screen_y: int, delay: float = 0.1):

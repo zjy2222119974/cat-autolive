@@ -9,219 +9,170 @@ from enum import Enum
 logger = logging.getLogger(__name__)
 
 class FeederState(Enum):
-    """喂食器状态"""
-    UNKNOWN = "unknown"
-    HOME_PAGE = "home"  # 首页
-    FEEDER_PAGE = "feeder"  # 可视喂食器页面
-    FEEDING_DIALOG = "feeding"  # 喂食份数弹窗
-    COMPLETED = "completed"  # 完成
+    UNKNOWN = 0
+    MAIN_PAGE = 1
+    FEEDING_DIALOG = 2
 
 class FreezeDriedFeederAutomation:
     """冻干喂食器自动化控制"""
     
-    def __init__(self, ocr_detector, click_simulator):
+    def __init__(self, ocr_detector, click_simulator, target_size: Tuple[int, int] = (720, 1280)):
         """初始化
         
         Args:
             ocr_detector: OCR检测器实例
             click_simulator: 点击模拟器实例
+            target_size: 目标分辨率 (暂不强制缩放)
         """
         self.ocr = ocr_detector
         self.clicker = click_simulator
+        self.target_size = target_size
         self.current_state = FeederState.UNKNOWN
         self.max_retries = 3
     
-    def feed(self, hwnd: int, capture_func, portions: int = 1) -> bool:
-        """执行喂食操作
-        
-        Args:
-            hwnd: 窗口句柄
-            capture_func: 窗口截图函数，返回numpy数组
-            portions: 喂食份数（默认1份）
-            
-        Returns:
-            是否成功
-        """
-        logger.info(f"开始自动喂食流程，目标份数: {portions}")
-        
+    def feed_manual(self, hwnd: int, portions: int, capture_func) -> bool:
+        """执行手动喂食流程"""
         try:
-            # 步骤1: 导航到喂食份数弹窗
+            logger.info(f"=== 开始冻干喂食器自动喂食流程 (目标: {portions}份) ===")
+            self.current_state = FeederState.UNKNOWN
+            
+            # 1. 确保在设备详情页或进入设备详情页
+            if not self._ensure_device_page(hwnd, capture_func):
+                logger.error("未能进入设备详情页")
+                return False
+                
+            # 2. 点击喂食按钮，弹出选择框
+            # 查找 "喂食份数" 或 "手动投喂" 按钮
             if not self._navigate_to_feeding_dialog(hwnd, capture_func):
-                logger.error("导航到喂食份数弹窗失败")
+                logger.error("未能打开喂食对话框")
                 return False
-            
-            # 步骤2: 选择份数并确认
-            if not self._select_portions_and_confirm(hwnd, capture_func, portions):
-                logger.error("选择份数并确认失败")
+                
+            # 3. 选择份数
+            if not self._select_portions(hwnd, portions, capture_func):
+                logger.error("选择份数失败")
                 return False
-            
-            logger.info("自动喂食流程完成")
-            self.current_state = FeederState.COMPLETED
+                
+            # 4. 确认喂食
+            if not self._confirm_feeding(hwnd, capture_func):
+                logger.error("确认喂食失败")
+                return False
+                
+            logger.info("=== 冻干喂食器自动喂食成功 ===")
             return True
             
         except Exception as e:
             logger.error(f"自动喂食流程异常: {e}")
             return False
     
+    def _click_scaled(self, hwnd: int, x: int, y: int, actual_width: int, actual_height: int, delay: float = 0.5):
+        """点击坐标 (针对 PostMessage 优化: 不强制缩放)"""
+        # 不再使用 target_size 强制缩放，直接使用识别到的坐标
+        target_x = x
+        target_y = y
+        logger.info(f"点击坐标: ({x}, {y})")
+        self.clicker.click_at_position(hwnd, target_x, target_y, delay=delay)
+
     def _navigate_to_feeding_dialog(self, hwnd: int, capture_func) -> bool:
-        """导航到喂食份数弹窗
+        """导航到喂食份数弹窗"""
+        logger.info("寻找喂食入口...")
         
-        逻辑：
-        1. 优先查找"喂食份数"按钮，找到直接点击
-        2. 如果没找到，判断当前页面状态：
-           a) 首页场景：检测到"常用"+"首页" → 点击监控画面 → 点击"查看设备" → 找"喂食份数"
-           b) 按钮隐藏场景：检测到"高清"或"清" → 点击画面中心 → 显示"喂食份数"
+        screenshot = capture_func()
+        if screenshot is None:
+            return False
+            
+        h, w = screenshot.shape[:2]
         
-        Returns:
-            是否成功
-        """
-        logger.info("="*60)
-        logger.info("开始导航到喂食份数弹窗")
-        logger.info("="*60)
+        # 优化：优先检查下半部分
+        roi_y = int(h * 0.4)
+        roi = screenshot[roi_y:, :]
         
-        for attempt in range(self.max_retries):
-            logger.info(f">>> 导航尝试 {attempt + 1}/{self.max_retries} <<<")
+        # 尝试查找 "喂食份数"
+        pos = self.ocr.find_text(roi, "喂食份数", fuzzy=True)
+        if pos:
+            real_x, real_y = pos[0], pos[1] + roi_y
+            logger.info(f"✓ 找到 '喂食份数'，点击: ({real_x}, {real_y})")
+            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.5)
+            self.current_state = FeederState.FEEDING_DIALOG
+            return True
             
-            # 截图
-            screenshot = capture_func()
-            if screenshot is None:
-                logger.error("截图失败")
-                time.sleep(1)
-                continue
-            
-            # 执行一次OCR，获取所有文字
-            all_text = self.ocr.get_all_text(screenshot)
-            all_text_list = [t[0] for t in all_text]
-            logger.info(f"当前页面识别到的文字: {all_text_list}")
-            
-            # 保存调试截图
-            self._save_debug_screenshot(screenshot, attempt)
-            
-            # 【优先级1】直接查找"喂食份数" - 最高优先级
-            logger.info("【优先级1】查找'喂食份数'按钮...")
-            feeding_portions_pos = self._find_text_in_results(all_text, "喂食份数")
-            
-            if feeding_portions_pos:
-                logger.info(f"✓✓✓ 找到'喂食份数'按钮，位置: {feeding_portions_pos} ✓✓✓")
-                logger.info(f"准备点击位置: ({feeding_portions_pos[0]}, {feeding_portions_pos[1]})")
-                self.clicker.click_at_position(hwnd, feeding_portions_pos[0], feeding_portions_pos[1], delay=0.5)
-                logger.info("已发送点击指令")
-                self.current_state = FeederState.FEEDING_DIALOG
-                logger.info("="*60)
-                logger.info("成功进入喂食份数弹窗")
-                logger.info("="*60)
-                return True
-            else:
-                logger.warning("✗ 未找到'喂食份数'按钮，开始判断页面状态...")
-            
-            # 【场景A】检测是否在首页
-            # 主要标识："常用"（"首页"经常被OCR识别错误，不作为必要条件）
-            # 辅助验证：底部导航按钮
-            logger.info("【场景A】检测是否在首页...")
-            has_changyong = self._find_text_in_results(all_text, "常用") is not None
-            
-            # 检测底部导航（作为辅助验证）
-            has_xiaoxi = self._find_text_in_results(all_text, "消息") is not None
-            has_paizhao = self._find_text_in_results(all_text, "拍照") is not None
-            has_shezhi = self._find_text_in_results(all_text, "设置") is not None
-            has_zhineng = self._find_text_in_results(all_text, "智能") is not None
-            has_zhushou = self._find_text_in_results(all_text, "助手") is not None
-            
-            # 底部导航按钮数量
-            bottom_nav_count = sum([has_xiaoxi, has_paizhao, has_shezhi, has_zhineng, has_zhushou])
-            
-            logger.info(f"  检测结果: 常用={has_changyong}")
-            logger.info(f"  底部导航: 消息={has_xiaoxi}, 拍照={has_paizhao}, 设置={has_shezhi}, 智能={has_zhineng}, 助手={has_zhushou}")
-            logger.info(f"  底部导航按钮数量: {bottom_nav_count}/5")
-            
-            # 判断：有"常用"且至少有2个底部导航按钮
-            if has_changyong and bottom_nav_count >= 2:
-                logger.info(f"✓ 检测到'常用'且有{bottom_nav_count}个底部导航按钮，确认当前在首页")
-                
-                # 点击监控画面区域（在底部按钮上方）
-                # 假设画面在屏幕中上部，点击中心偏上位置
-                logger.info("  点击监控画面区域...")
-                screenshot_height, screenshot_width = screenshot.shape[:2]
-                click_x = screenshot_width // 2
-                click_y = screenshot_height // 3  # 上方1/3处
-                
-                self.clicker.click_at_position(hwnd, click_x, click_y, delay=1.0)
-                time.sleep(1)
-                
-                # 重新截图，查找"查看设备"按钮
-                screenshot = capture_func()
-                all_text = self.ocr.get_all_text(screenshot)
-                all_text_list = [t[0] for t in all_text]
-                logger.info(f"  点击后识别到的文字: {all_text_list}")
-                
-                view_device_pos = self._find_text_in_results(all_text, "查看设备")
-                if view_device_pos:
-                    logger.info(f"  ✓ 找到'查看设备'按钮，位置: {view_device_pos}")
-                    self.clicker.click_at_position(hwnd, view_device_pos[0], view_device_pos[1], delay=1.0)
-                    time.sleep(2)
-                    
-                    # 进入设备页面后，再次查找"喂食份数"
-                    screenshot = capture_func()
-                    all_text = self.ocr.get_all_text(screenshot)
-                    all_text_list = [t[0] for t in all_text]
-                    logger.info(f"  进入设备页面后识别到的文字: {all_text_list}")
-                    
-                    feeding_portions_pos = self._find_text_in_results(all_text, "喂食份数")
-                    if feeding_portions_pos:
-                        logger.info(f"  ✓ 在设备页面找到'喂食份数'，位置: {feeding_portions_pos}")
-                        self.clicker.click_at_position(hwnd, feeding_portions_pos[0], feeding_portions_pos[1], delay=0.5)
-                        self.current_state = FeederState.FEEDING_DIALOG
-                        return True
-                    else:
-                        logger.warning("  ✗ 进入设备页面后仍未找到'喂食份数'")
-                        continue
-                else:
-                    logger.warning("  ✗ 未找到'查看设备'按钮")
-                    continue
-            
-            # 【场景B】检测按钮是否被隐藏（静止太久，检测"高清"或"清"）
-            logger.info("【场景B】检测按钮是否被隐藏...")
-            has_gaoqing = self._find_text_in_results(all_text, "高清") is not None
-            has_qing = self._find_text_in_results(all_text, "清") is not None
-            
-            if has_gaoqing or has_qing:
-                logger.info(f"✓ 检测到画质标识（高清={has_gaoqing}, 清={has_qing}），判断按钮可能被隐藏")
-                logger.info("  点击画面中心以显示按钮...")
-                
-                # 点击画面中心
-                screenshot_height, screenshot_width = screenshot.shape[:2]
-                click_x = screenshot_width // 2
-                click_y = screenshot_height // 2
-                
-                self.clicker.click_at_position(hwnd, click_x, click_y, delay=1.0)
-                time.sleep(1)
-                
-                # 重新截图，查找"喂食份数"
-                screenshot = capture_func()
-                all_text = self.ocr.get_all_text(screenshot)
-                all_text_list = [t[0] for t in all_text]
-                logger.info(f"  点击后识别到的文字: {all_text_list}")
-                
-                feeding_portions_pos = self._find_text_in_results(all_text, "喂食份数")
-                if feeding_portions_pos:
-                    logger.info(f"  ✓ 按钮已显示，找到'喂食份数'，位置: {feeding_portions_pos}")
-                    self.clicker.click_at_position(hwnd, feeding_portions_pos[0], feeding_portions_pos[1], delay=0.5)
-                    self.current_state = FeederState.FEEDING_DIALOG
-                    return True
-                else:
-                    logger.warning("  ✗ 点击后仍未找到'喂食份数'")
-                    continue
-            
-            # 所有场景都未匹配
-            logger.warning(f"✗ 无法识别当前页面状态")
-            logger.warning(f"第 {attempt + 1} 次尝试失败，等待后重试...")
-            time.sleep(2)
-        
-        logger.error("导航失败，已达最大重试次数")
-        logger.error("请确保APP已打开并位于以下页面之一：")
-        logger.error("  1. 首页（能看到'常用'和'首页'）")
-        logger.error("  2. 设备监控页面（能看到'喂食份数'或'高清'/'清'）")
+        # 尝试 "手动投喂"
+        pos = self.ocr.find_text(roi, "手动投喂", fuzzy=True)
+        if pos:
+            real_x, real_y = pos[0], pos[1] + roi_y
+            logger.info(f"✓ 找到 '手动投喂'，点击: ({real_x}, {real_y})")
+            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.5)
+            self.current_state = FeederState.FEEDING_DIALOG
+            return True
+
+        logger.warning("未找到喂食入口")
         return False
+    
+    def _ensure_device_page(self, hwnd: int, capture_func) -> bool:
+        """确保在设备页面"""
+        # 简单实现：我们假设已经在设备页面，或者通过"查看设备"进入
+        # 这里简化处理，直接返回True，因为 _navigate_to_feeding_dialog 会做实际检查
+        # 如果需要更复杂的导航逻辑，参考 Catlink 实现
+        return True
+
+    def _select_portions(self, hwnd: int, portions: int, capture_func) -> bool:
+        """选择份数"""
+        logger.info(f"选择份数: {portions}")
+        time.sleep(1.0) # 等待弹窗
+        
+        screenshot = capture_func()
+        h, w = screenshot.shape[:2]
+        
+        # 假设份数选项在底部弹窗
+        roi_y = int(h * 0.5)
+        roi = screenshot[roi_y:, :]
+        
+        # 查找对应数字的选项
+        target_text = f"{portions}份" # 或者只是数字 "1", "2"
+        
+        # 先试带单位的
+        pos = self.ocr.find_text(roi, target_text, fuzzy=True)
+        if not pos:
+             # 再试纯数字 (需要精确匹配)
+             # 这里比较难，单纯找 "1" 可能会找到时间或者其他数字
+             # 假设界面上有 "1份" "2份"...
+             pass
+             
+        if not pos:
+             # 尝试直接找 "portions" 数字
+             # 这部分逻辑需要根据实际UI调整
+             logger.warning(f"未找到 '{target_text}'，尝试模糊查找")
+             pass
+        
+        if pos:
+            real_x, real_y = pos[0], pos[1] + roi_y
+            logger.info(f"✓ 找到选项 '{target_text}'，点击: ({real_x}, {real_y})")
+            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.5)
+            return True
+            
+        # 如果还没找到，可能是滑轮选择？
+        # 暂时只支持点击式选择
+        logger.error(f"无法选择份数 {portions}")
+        return False
+        
+    def _confirm_feeding(self, hwnd: int, capture_func) -> bool:
+        """点击确认/投喂"""
+        logger.info("查找确认按钮...")
+        screenshot = capture_func()
+        h, w = screenshot.shape[:2]
+        roi_y = int(h * 0.6)
+        roi = screenshot[roi_y:, :]
+        
+        # 常见的确认文字
+        confirm_texts = ["投喂", "确认", "确定", "立即投喂", "出粮"]
+        
+        for text in confirm_texts:
+            pos = self.ocr.find_text(roi, text, fuzzy=True)
+            if pos:
+                real_x, real_y = pos[0], pos[1] + roi_y
+                logger.info(f"✓ 找到确认按钮 '{text}'，点击: ({real_x}, {real_y})")
+                self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.2)
+                return True
+
     
     def _find_text_in_results(self, all_text: list, target: str) -> Optional[Tuple[int, int]]:
         """在OCR结果中查找目标文字
@@ -337,7 +288,8 @@ class FreezeDriedFeederAutomation:
         
         if pos:
             logger.info(f">>> 找到份数选项，准备点击位置: ({pos[0]}, {pos[1]}) <<<")
-            self.clicker.click_at_position(hwnd, pos[0], pos[1], delay=0.5)
+            h, w = screenshot.shape[:2]
+            self._click_scaled(hwnd, pos[0], pos[1], w, h, delay=0.5)
             logger.info("已发送点击指令")
         else:
             logger.error(f"✗✗✗ 未找到份数选项'{portions}' ✗✗✗")
@@ -358,7 +310,9 @@ class FreezeDriedFeederAutomation:
         
         if pos:
             logger.info(f"✓ 找到'确认'按钮，位置: {pos}")
-            self.clicker.click_at_position(hwnd, pos[0], pos[1], delay=1.0)
+            logger.info(f"✓ 找到'确认'按钮，位置: {pos}")
+            h, w = screenshot.shape[:2]
+            self._click_scaled(hwnd, pos[0], pos[1], w, h, delay=1.0)
             logger.info("已点击'确认'按钮")
             logger.info("="*60)
             logger.info("份数选择并确认完成")

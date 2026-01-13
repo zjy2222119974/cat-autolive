@@ -3,7 +3,7 @@
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QLineEdit, 
     QComboBox, QPushButton, QHBoxLayout, QMessageBox,
-    QSpinBox
+    QSpinBox, QFormLayout, QFrame, QScrollArea, QWidget
 )
 from PyQt6.QtCore import Qt
 from src.utils.device_manager import load_devices, get_device_type_label
@@ -20,8 +20,7 @@ class EditControllerDialog(QDialog):
         self.original_name = None
         
         self.setWindowTitle("编辑控制器")
-        self.setMinimumWidth(400)
-        self.setMinimumHeight(300)
+        self.resize(500, 600)  # 增加默认尺寸
         self.setStyleSheet("""
             QDialog {
                 background-color: #2d2d30;
@@ -39,7 +38,7 @@ class EditControllerDialog(QDialog):
                 border-radius: 4px;
                 padding: 6px;
                 font-size: 14px;
-                min-height: 30px;
+                min-height: 20px;
             }
             QLineEdit:focus, QComboBox:focus, QSpinBox:focus {
                 border: 1px solid #007acc;
@@ -61,40 +60,45 @@ class EditControllerDialog(QDialog):
             QPushButton#deleteBtn:hover {
                 background-color: #e81123;
             }
+            QGroupBox {
+                border: 1px solid #3e3e42;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 0 5px;
+                color: #aaaaaa;
+            }
         """)
         self._init_ui()
         
     def _init_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
+        main_layout = QVBoxLayout(self)
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        # 1. 基础信息区域
+        basic_info_layout = QFormLayout()
+        basic_info_layout.setSpacing(10)
         
         # 控制器选择
-        select_layout = QVBoxLayout()
-        select_layout.setSpacing(5)
-        select_layout.addWidget(QLabel("选择控制器:"))
         self.device_combo = QComboBox()
         self.device_combo.addItem("-- 请选择控制器 --", None)
         for name in self.devices.keys():
             self.device_combo.addItem(name, name)
         self.device_combo.currentIndexChanged.connect(self._on_device_selected)
-        select_layout.addWidget(self.device_combo)
-        layout.addLayout(select_layout)
+        basic_info_layout.addRow("选择控制器:", self.device_combo)
         
         # 名称
-        name_layout = QVBoxLayout()
-        name_layout.setSpacing(5)
-        name_layout.addWidget(QLabel("控制器名称:"))
         self.name_input = QLineEdit()
         self.name_input.setPlaceholderText("请输入控制器名称")
         self.name_input.setEnabled(False)
-        name_layout.addWidget(self.name_input)
-        layout.addLayout(name_layout)
+        basic_info_layout.addRow("控制器名称:", self.name_input)
         
         # 类型
-        type_layout = QVBoxLayout()
-        type_layout.setSpacing(5)
-        type_layout.addWidget(QLabel("类型:"))
         self.type_combo = QComboBox()
         self.type_combo.addItems([
             "猫粮喂食器", 
@@ -107,15 +111,25 @@ class EditControllerDialog(QDialog):
         ])
         self.type_combo.setEnabled(False)
         self.type_combo.currentTextChanged.connect(self._on_type_changed)
-        type_layout.addWidget(self.type_combo)
-        layout.addLayout(type_layout)
+        basic_info_layout.addRow("设备类型:", self.type_combo)
         
-        # 动态参数区域
-        self.params_layout = QVBoxLayout()
+        main_layout.addLayout(basic_info_layout)
+        
+        # 2. 动态参数区域 (使用 ScrollArea 防止内容过多)
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setStyleSheet("background-color: transparent;")
+        
+        self.params_container = QWidget()
+        self.params_layout = QVBoxLayout(self.params_container)
+        self.params_layout.setContentsMargins(0, 0, 0, 0)
         self.params_layout.setSpacing(10)
-        layout.addLayout(self.params_layout)
         
-        # 按钮区域
+        scroll_area.setWidget(self.params_container)
+        main_layout.addWidget(scroll_area, 1) # 占据主要空间
+        
+        # 3. 按钮区域
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(10)
         
@@ -140,7 +154,7 @@ class EditControllerDialog(QDialog):
         self.btn_save.setEnabled(False)
         btn_layout.addWidget(self.btn_save)
         
-        layout.addLayout(btn_layout)
+        main_layout.addLayout(btn_layout)
         
     def _on_device_selected(self, index):
         """选择设备时的回调"""
@@ -194,6 +208,17 @@ class EditControllerDialog(QDialog):
             item = self.params_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
+            elif item.layout():
+                # 递归清除布局
+                self._clear_layout(item.layout())
+    
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self._clear_layout(item.layout())
     
     def _load_params(self, config):
         """根据类型加载参数输入框"""
@@ -201,38 +226,80 @@ class EditControllerDialog(QDialog):
         
         type_label = self.type_combo.currentText()
         
+        # 通用参数布局
+        form_layout = QFormLayout()
+        form_layout.setSpacing(10)
+        form_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        
         # 根据类型显示不同的参数
         if type_label in ["猫粮喂食器", "冻干喂食器", "整合APP"]:
-            # 模拟器类型 - 需要 app_package
-            pkg_layout = QVBoxLayout()
-            pkg_layout.setSpacing(5)
-            pkg_layout.addWidget(QLabel("应用包名 (app_package):"))
+            # --- 模拟器设置 ---
+            
+            # 包名
             self.app_package_input = QLineEdit()
             self.app_package_input.setPlaceholderText("例如: com.example.app")
             self.app_package_input.setText(config.get('app_package', ''))
-            pkg_layout.addWidget(self.app_package_input)
-            self.params_layout.addLayout(pkg_layout)
+            form_layout.addRow("应用包名:", self.app_package_input)
+            
+            # 分辨率设置
+            separator = QFrame()
+            separator.setFrameShape(QFrame.Shape.HLine)
+            separator.setFrameShadow(QFrame.Shadow.Sunken)
+            separator.setStyleSheet("background-color: #3e3e42; margin-top: 10px; margin-bottom: 10px;")
+            self.params_layout.addLayout(form_layout)
+            self.params_layout.addWidget(separator)
+            
+            # 新的 FormLayout 用于分辨率设置
+            res_layout = QFormLayout()
+            res_layout.setSpacing(10)
+            res_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+            
+            res_label = QLabel("分辨率设置 (用于坐标计算):")
+            res_label.setStyleSheet("font-weight: bold; color: #cccccc;")
+            self.params_layout.addWidget(res_label)
+            
+            # Width
+            self.width_input = QSpinBox()
+            self.width_input.setRange(100, 4000)
+            self.width_input.setValue(config.get('target_width', 720))
+            res_layout.addRow("宽 (Width):", self.width_input)
+            
+            # Height
+            self.height_input = QSpinBox()
+            self.height_input.setRange(100, 4000)
+            self.height_input.setValue(config.get('target_height', 1280))
+            res_layout.addRow("高 (Height):", self.height_input)
+            
+            # DPI
+            self.dpi_input = QSpinBox()
+            self.dpi_input.setRange(72, 640)
+            self.dpi_input.setValue(config.get('dpi', 320))
+            res_layout.addRow("DPI:", self.dpi_input)
+            
+            self.params_layout.addLayout(res_layout)
+            
+            # 添加说明
+            hint_label = QLabel("注意: 请确保此分辨率与模拟器内部设置一致，否则自动化点击可能偏离。")
+            hint_label.setStyleSheet("color: #888888; font-size: 12px; font-style: italic;")
+            hint_label.setWordWrap(True)
+            self.params_layout.addWidget(hint_label)
             
         elif type_label in ["肉泥喂食器", "罐头喂食器", "哈基米小车", "激光逗猫球"]:
-            # 物联网类型 - 需要 host 和 port
-            host_layout = QVBoxLayout()
-            host_layout.setSpacing(5)
-            host_layout.addWidget(QLabel("主机地址 (host):"))
+            # --- 物联网设置 ---
             self.host_input = QLineEdit()
             self.host_input.setPlaceholderText("例如: 192.168.1.100")
             self.host_input.setText(config.get('host', ''))
-            host_layout.addWidget(self.host_input)
-            self.params_layout.addLayout(host_layout)
+            form_layout.addRow("主机地址:", self.host_input)
             
-            port_layout = QVBoxLayout()
-            port_layout.setSpacing(5)
-            port_layout.addWidget(QLabel("端口 (port):"))
             self.port_input = QSpinBox()
             self.port_input.setRange(1, 65535)
             self.port_input.setValue(config.get('port', 80))
-            port_layout.addWidget(self.port_input)
-            self.params_layout.addLayout(port_layout)
-    
+            form_layout.addRow("端口:", self.port_input)
+            
+            self.params_layout.addLayout(form_layout)
+            
+        self.params_layout.addStretch()
+
     def _on_save(self):
         """保存修改"""
         new_name = self.name_input.text().strip()
@@ -294,6 +361,11 @@ class EditControllerDialog(QDialog):
                 QMessageBox.warning(self, "提示", "请输入应用包名")
                 return None
             config['app_package'] = app_package
+            
+            # --- 保存分辨率设置 ---
+            config['target_width'] = self.width_input.value()
+            config['target_height'] = self.height_input.value()
+            config['dpi'] = self.dpi_input.value()
             
         elif type_label in ["肉泥喂食器", "罐头喂食器", "哈基米小车", "激光逗猫球"]:
             host = self.host_input.text().strip()

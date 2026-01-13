@@ -127,47 +127,8 @@ class HubPage(QWidget):
         
         self.device_cards = []
         
-        if self.dispatcher:
-            # 获取所有设备并创建卡片
-            # 我们按照固定顺序或名字排序
-            drivers = list(self.dispatcher.drivers.items())
-            
-            # 手动映射中文名称
-            name_map = {
-                "feeder_paste": "湿粮喂食器",
-                "feeder_kibble": "猫粮喂食器",
-                "feeder_freeze_dried": "冻干喂食器",
-                "feeder_canned": "猫罐喂食器",
-                "car_hakimi": "哈基米车",
-                "laser_ball": "激光灯球"
-            }
-            
-            device_infos = [
-                ("feeder_paste", "物联网"),
-                ("feeder_kibble", "模拟器"),
-                ("feeder_freeze_dried", "模拟器"),
-                ("feeder_canned", "物联网"),
-                ("car_hakimi", "物联网"),
-                ("laser_ball", "物联网"),
-            ]
-            
-            for key, type_label in device_infos:
-                driver = self.dispatcher.drivers.get(key)
-                display_name = name_map.get(key, key)
-                
-                # 如果是模拟器，类型显示模拟器，否则显示物联网(默认)
-                # 为了更准确，可以检查 driver 类型
-                real_type = "物联网"
-                if driver and isinstance(driver, SimulatorDriver):
-                    real_type = "模拟器"
-                
-                card = DeviceCard(display_name, real_type, driver)
-                self.device_cards.append(card)
-                
-                # 连接点击信号
-                card.clicked.connect(self._on_device_clicked)
-                
-                self.flow_layout.addWidget(card)
+        # 初始化设备列表
+        self.refresh_devices()
                     
         layout.addWidget(scroll_area, 1)
         
@@ -245,12 +206,14 @@ class HubPage(QWidget):
     
     def refresh_devices(self):
         """刷新设备列表"""
-        if not hasattr(self, 'grid_layout'):
+        if not hasattr(self, 'flow_layout'):
             return
             
         # 清除现有内容
-        while self.grid_layout.count():
-            item = self.grid_layout.takeAt(0)
+        # FlowLayout 的清除需要特殊处理，或者逐个可以
+        # 注意：Layout item 可能是 widget 也可能是 layout
+        while self.flow_layout.count():
+            item = self.flow_layout.takeAt(0)
             widget = item.widget()
             if widget:
                 widget.deleteLater()
@@ -267,15 +230,14 @@ class HubPage(QWidget):
             "feeder_freeze_dried": "冻干喂食器",
             "feeder_canned": "猫罐喂食器",
             "car_hakimi": "哈基米车",
-            "laser_ball": "激光灯球"
+            "laser_ball": "激光灯球",
+            "catlink": "Catlink喂食器"
         }
         
-        row = 0
-        col = 0
-        max_cols = 4
+        # 遍历所有驱动 (按名称排序)
+        drivers = sorted(self.dispatcher.drivers.items(), key=lambda x: x[0])
         
-        # 遍历所有驱动
-        for key, driver in self.dispatcher.drivers.items():
+        for key, driver in drivers:
             display_name = name_map.get(key, key)
             
             real_type = "物联网"
@@ -288,12 +250,7 @@ class HubPage(QWidget):
             # 连接点击信号
             card.clicked.connect(self._on_device_clicked)
             
-            self.grid_layout.addWidget(card, row, col)
-            
-            col += 1
-            if col >= max_cols:
-                col = 0
-                row += 1
+            self.flow_layout.addWidget(card)
     
     def _update_status(self):
         """更新状态显示"""

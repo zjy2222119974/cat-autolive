@@ -20,16 +20,26 @@ class WindowCapture:
         self.error_count = 0
         
     def get_window_rect(self):
-        """获取窗口屏幕坐标"""
-        rect = wintypes.RECT()
-        user32.GetWindowRect(self.hwnd, ctypes.byref(rect))
+        """获取窗口客户区屏幕坐标 (Client Area)"""
+        # 1. 获取客户区大小
+        client_rect = wintypes.RECT()
+        user32.GetClientRect(self.hwnd, ctypes.byref(client_rect))
+        width = client_rect.right - client_rect.left
+        height = client_rect.bottom - client_rect.top
+        
+        # 2. 获取客户区左上角在屏幕上的位置
+        pt = wintypes.POINT()
+        pt.x = 0
+        pt.y = 0
+        user32.ClientToScreen(self.hwnd, ctypes.byref(pt))
+        
         return {
-            'left': rect.left,
-            'top': rect.top,
-            'right': rect.right,
-            'bottom': rect.bottom,
-            'width': rect.right - rect.left,
-            'height': rect.bottom - rect.top
+            'left': pt.x,
+            'top': pt.y,
+            'right': pt.x + width,
+            'bottom': pt.y + height,
+            'width': width,
+            'height': height
         }
     
     def capture(self):
@@ -53,9 +63,9 @@ class WindowCapture:
             
             # 第一次捕获时输出调试信息
             if self.error_count == 0:
-                print(f"开始捕获窗口 (HWND: {self.hwnd})")
-                print(f"窗口位置: ({rect['left']}, {rect['top']}, {rect['right']}, {rect['bottom']})")
-                print(f"窗口尺寸: {rect['width']}x{rect['height']}")
+                # print(f"开始捕获窗口 (HWND: {self.hwnd})")
+                # print(f"窗口位置: ({rect['left']}, {rect['top']}, {rect['right']}, {rect['bottom']})")
+                # print(f"窗口尺寸: {rect['width']}x{rect['height']}")
                 self.error_count = -1
             
             # 使用 PIL 捕获整个屏幕区域（包括所有显示器）

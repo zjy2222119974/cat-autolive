@@ -55,8 +55,9 @@ class PasteFeederDriver(IoTDriver, DeviceMixin):
 
 class KibbleFeederDriver(SimulatorDriver, DeviceMixin):
     """猫粮喂食器 (模拟器)"""
-    def __init__(self, name: str, app_package: str):
-        SimulatorDriver.__init__(self, name, app_package=app_package)
+    def __init__(self, name: str, app_package: str, target_width: int = 720, target_height: int = 1280, dpi: int = 320):
+        SimulatorDriver.__init__(self, name, app_package=app_package, 
+                                target_width=target_width, target_height=target_height, dpi=dpi)
         DeviceMixin.__init__(self)
         
     def execute(self, cmd_type: str, args: Dict[str, Any] = None) -> bool:
@@ -72,11 +73,13 @@ class KibbleFeederDriver(SimulatorDriver, DeviceMixin):
 
 class FreezeDriedFeederDriver(SimulatorDriver, DeviceMixin):
     """冻干喂食器 (模拟器)"""
-    def __init__(self, name: str, app_package: str):
-        SimulatorDriver.__init__(self, name, app_package=app_package)
+    def __init__(self, name: str, app_package: str, ocr_detector=None, 
+                 target_width: int = 720, target_height: int = 1280, dpi: int = 320):
+        SimulatorDriver.__init__(self, name, app_package=app_package,
+                                target_width=target_width, target_height=target_height, dpi=dpi)
         DeviceMixin.__init__(self)
         self._automation = None
-        self._ocr_detector = None
+        self._ocr_detector = ocr_detector
         self._click_simulator = None
     
     def _init_automation(self):
@@ -90,9 +93,18 @@ class FreezeDriedFeederDriver(SimulatorDriver, DeviceMixin):
             from src.automation.feeder_automation import FreezeDriedFeederAutomation
             
             self.logger.info(f"[{self.name}] 初始化OCR自动化组件...")
-            self._ocr_detector = OCRDetector()
+            if self._ocr_detector is None:
+                self._ocr_detector = OCRDetector()
+            else:
+                 self.logger.info(f"[{self.name}] 使用预加载的OCR引擎")
+
             self._click_simulator = ClickSimulator()
-            self._automation = FreezeDriedFeederAutomation(self._ocr_detector, self._click_simulator)
+            # 传递目标分辨率
+            self._automation = FreezeDriedFeederAutomation(
+                self._ocr_detector, 
+                self._click_simulator,
+                target_size=(self.target_width, self.target_height)
+            )
             self.logger.info(f"[{self.name}] 自动化组件初始化完成")
         except Exception as e:
             self.logger.error(f"[{self.name}] 自动化组件初始化失败: {e}")
@@ -143,14 +155,76 @@ class FreezeDriedFeederDriver(SimulatorDriver, DeviceMixin):
 
 class IntegratedAppDriver(SimulatorDriver, DeviceMixin):
     """整合APP (模拟器)"""
-    def __init__(self, name: str, app_package: str):
-        SimulatorDriver.__init__(self, name, app_package=app_package)
+    def __init__(self, name: str, app_package: str, ocr_detector=None,
+                 target_width: int = 720, target_height: int = 1280, dpi: int = 320):
+        SimulatorDriver.__init__(self, name, app_package=app_package,
+                                target_width=target_width, target_height=target_height, dpi=dpi)
         DeviceMixin.__init__(self)
+        self._automation = None
+        self._ocr_detector = ocr_detector
+        self._click_simulator = None
+
+    def _init_automation(self):
+        """初始化自动化组件"""
+        if self._automation is not None:
+            return
+        
+        try:
+            from src.utils.ocr_utils import OCRDetector
+            from src.utils.click_simulator import ClickSimulator
+            from src.automation.catlink_automation import CatlinkAutomation
+            
+            self.logger.info(f"[{self.name}] 初始化 Catlink 自动化组件...")
+            if self._ocr_detector is None:
+                self._ocr_detector = OCRDetector()
+            else:
+                 self.logger.info(f"[{self.name}] 使用预加载的OCR引擎")
+
+            self._click_simulator = ClickSimulator()
+            self._click_simulator = ClickSimulator()
+            # 传递目标分辨率
+            self._automation = CatlinkAutomation(
+                self._ocr_detector, 
+                self._click_simulator,
+                target_size=(self.target_width, self.target_height)
+            )
+            self.logger.info(f"[{self.name}] 自动化组件初始化完成")
+        except Exception as e:
+            self.logger.error(f"[{self.name}] 自动化组件初始化失败: {e}")
+            self._automation = None
 
     def execute(self, cmd_type: str, args: Dict[str, Any] = None) -> bool:
         if not self.is_connected:
             return False
             
+        # 如果是喂食指令，使用自动化脚本
+        if cmd_type == "feed":
+            if self._automation is None:
+                self._init_automation()
+                
+            if self._automation:
+                def task():
+                    try:
+                        # 确保有句柄
+                        if not hasattr(self, 'hwnd') or not self.hwnd:
+                            self.logger.error(f"[{self.name}] 未绑定窗口，无法执行自动化")
+                            return
+
+                        self.logger.info(f"[{self.name}] >>> 开始 Catlink 自动喂食...")
+                        success = self._automation.feed(
+                            hwnd=self.hwnd,
+                            capture_func=self.capture_window
+                        )
+                        if success:
+                            self.logger.info(f"[{self.name}] <<< 自动喂食完成")
+                        else:
+                            self.logger.error(f"[{self.name}] <<< 自动喂食失败")
+                    except Exception as e:
+                        self.logger.error(f"[{self.name}] 执行异常: {e}")
+                
+                return self._execute_with_lock("feed_catlink", task)
+        
+        # 默认行为
         def task():
             self.logger.info(f"[{self.name}] >>> 整合APP执行操作: {cmd_type}...")
             time.sleep(1.5)
