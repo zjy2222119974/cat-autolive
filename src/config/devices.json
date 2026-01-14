@@ -10,7 +10,12 @@
   },
   "feeder_freeze_dried": {
     "type": "FreezeDriedFeederDriver",
-    "app_package": "com.feeder.freeze"
+    "app_package": "com.feeder.freeze",
+    "emulator_path": "C:/Program Files/Netease/MuMu",
+    "adb_port": 16384,
+    "target_width": 720,
+    "target_height": 1280,
+    "dpi": 320
   },
   "feeder_canned": {
     "type": "CannedFeederDriver",
@@ -27,9 +32,11 @@
     "host": "192.168.1.104",
     "port": 80
   },
-  "catlink": {
+  "catlink_feeder": {
     "type": "IntegratedAppDriver",
     "app_package": "com.app.integrated.catlink",
+    "emulator_path": "C:/Program Files/Netease/MuMu",
+    "adb_port": 16384,
     "target_width": 720,
     "target_height": 1280,
     "dpi": 320

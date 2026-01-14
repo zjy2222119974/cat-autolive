@@ -88,12 +88,12 @@ class SimulatorDriver(BaseDriver):
                 height = image.height()
                 ptr = image.bits()
                 ptr.setsize(height * width * 4)
-                arr = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
+                arr = np.frombuffer(ptr, np.uint8).reshape((height, width, 4)).copy()
                 
-                # 转换为 BGR (为OCR做准备)
-                arr = cv2.cvtColor(arr, cv2.COLOR_RGBA2BGR)
+                # 转换为 BGR (OpenCV 标准格式)
+                arr_bgr = cv2.cvtColor(arr, cv2.COLOR_BGRA2BGR)
                 
-                return arr
+                return arr_bgr
             else:
                 self.logger.warning(f"[{self.name}] 截图失败")
                 return None

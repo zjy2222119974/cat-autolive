@@ -235,6 +235,20 @@ class EditControllerDialog(QDialog):
         if type_label in ["猫粮喂食器", "冻干喂食器", "整合APP"]:
             # --- 模拟器设置 ---
             
+            # 模拟器路径
+            emulator_path_layout = QHBoxLayout()
+            self.emulator_path_input = QLineEdit()
+            self.emulator_path_input.setPlaceholderText("例如: D:\\MuMu Player 12")
+            self.emulator_path_input.setText(config.get('emulator_path', ''))
+            emulator_path_layout.addWidget(self.emulator_path_input)
+            
+            browse_btn = QPushButton("浏览...")
+            browse_btn.setMaximumWidth(80)
+            browse_btn.clicked.connect(self._browse_emulator_path)
+            emulator_path_layout.addWidget(browse_btn)
+            
+            form_layout.addRow("模拟器路径:", emulator_path_layout)
+            
             # 包名
             self.app_package_input = QLineEdit()
             self.app_package_input.setPlaceholderText("例如: com.example.app")
@@ -300,6 +314,21 @@ class EditControllerDialog(QDialog):
             
         self.params_layout.addStretch()
 
+    
+    def _browse_emulator_path(self):
+        """浏览选择模拟器路径"""
+        from PyQt6.QtWidgets import QFileDialog
+        
+        directory = QFileDialog.getExistingDirectory(
+            self,
+            "选择模拟器安装目录",
+            self.emulator_path_input.text() or "C:\\",
+            QFileDialog.Option.ShowDirsOnly
+        )
+        
+        if directory:
+            self.emulator_path_input.setText(directory)
+    
     def _on_save(self):
         """保存修改"""
         new_name = self.name_input.text().strip()
@@ -361,8 +390,8 @@ class EditControllerDialog(QDialog):
                 QMessageBox.warning(self, "提示", "请输入应用包名")
                 return None
             config['app_package'] = app_package
-            
-            # --- 保存分辨率设置 ---
+            config['emulator_path'] = self.emulator_path_input.text().strip()
+            config['adb_port'] = 16384  # MuMu默认端口
             config['target_width'] = self.width_input.value()
             config['target_height'] = self.height_input.value()
             config['dpi'] = self.dpi_input.value()

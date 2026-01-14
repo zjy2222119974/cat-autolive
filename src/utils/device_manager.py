@@ -119,6 +119,10 @@ def create_driver(name: str, config: dict, ocr_detector=None):
         return LaserBallDriver(name, host=config.get("host"), port=config.get("port"))
     elif driver_type == "IntegratedAppDriver":
         return IntegratedAppDriver(name, app_package=config.get("app_package"), ocr_detector=ocr_detector,
-                                  target_width=target_width, target_height=target_height, dpi=dpi)
+                                  target_width=config.get("target_width", 720),
+                                  target_height=config.get("target_height", 1280),
+                                  dpi=config.get("dpi", 320),
+                                  emulator_path=config.get("emulator_path", ""),
+                                  adb_port=config.get("adb_port", 16384))
     
     return None

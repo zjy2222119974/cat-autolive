@@ -1,0 +1,1 @@
+G:\CODE\cat-autolive\platform-tools\adb.exe

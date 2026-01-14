@@ -156,13 +156,24 @@ class FreezeDriedFeederDriver(SimulatorDriver, DeviceMixin):
 class IntegratedAppDriver(SimulatorDriver, DeviceMixin):
     """整合APP (模拟器)"""
     def __init__(self, name: str, app_package: str, ocr_detector=None,
-                 target_width: int = 720, target_height: int = 1280, dpi: int = 320):
+                 target_width: int = 720, target_height: int = 1280, dpi: int = 320,
+                 emulator_path: str = "", adb_port: int = 16384):
         SimulatorDriver.__init__(self, name, app_package=app_package,
                                 target_width=target_width, target_height=target_height, dpi=dpi)
         DeviceMixin.__init__(self)
         self._automation = None
         self._ocr_detector = ocr_detector
         self._click_simulator = None
+        
+        # 保存配置供自动化组件使用
+        self.config = {
+            'app_package': app_package,
+            'target_width': target_width,
+            'target_height': target_height,
+            'dpi': dpi,
+            'emulator_path': emulator_path,
+            'adb_port': adb_port
+        }
 
     def _init_automation(self):
         """初始化自动化组件"""
@@ -171,7 +182,6 @@ class IntegratedAppDriver(SimulatorDriver, DeviceMixin):
         
         try:
             from src.utils.ocr_utils import OCRDetector
-            from src.utils.click_simulator import ClickSimulator
             from src.automation.catlink_automation import CatlinkAutomation
             
             self.logger.info(f"[{self.name}] 初始化 Catlink 自动化组件...")
@@ -180,13 +190,10 @@ class IntegratedAppDriver(SimulatorDriver, DeviceMixin):
             else:
                  self.logger.info(f"[{self.name}] 使用预加载的OCR引擎")
 
-            self._click_simulator = ClickSimulator()
-            self._click_simulator = ClickSimulator()
-            # 传递目标分辨率
+            # 创建自动化组件，传入设备配置（包含emulator_path和adb_port）
             self._automation = CatlinkAutomation(
-                self._ocr_detector, 
-                self._click_simulator,
-                target_size=(self.target_width, self.target_height)
+                self._ocr_detector,
+                device_config=self.config  # 传入完整的设备配置
             )
             self.logger.info(f"[{self.name}] 自动化组件初始化完成")
         except Exception as e:

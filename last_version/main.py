@@ -37,25 +37,15 @@ def main():
     
     # 初始化核心中枢
     from src.core.dispatcher import Dispatcher
+    from src.core.dispatcher import Dispatcher
     from src.utils.device_manager import load_devices, create_driver
-    from src.utils.ocr_utils import OCRDetector
     
     dispatcher = Dispatcher()
-    
-    # 预初始化 OCR 引擎 (避免第一次操作卡顿)
-    # 这会加载模型到内存
-    logger.info("正在预初始化 OCR 引擎...")
-    try:
-        ocr_detector = OCRDetector()
-    except Exception as e:
-        logger.error(f"OCR引擎初始化失败: {e}")
-        ocr_detector = None
     
     # 加载并注册所有设备
     devices_config = load_devices()
     for name, config in devices_config.items():
-        # 将共享的 OCR 引擎注入到驱动中
-        driver = create_driver(name, config, ocr_detector=ocr_detector)
+        driver = create_driver(name, config)
         if driver:
             # IoT 设备通常需要 host 配置，模拟器需要包名
             # 这里统一注册，connect 由用户手动触发或后续逻辑处理

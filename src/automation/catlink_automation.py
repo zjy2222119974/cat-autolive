@@ -1,46 +1,50 @@
 
 import time
+import os
 import logging
 import numpy as np
 from typing import Optional, Tuple
+from src.utils.click_simulator import ClickSimulator # Added this import
 
 logger = logging.getLogger(__name__)
 
 class CatlinkAutomation:
-    """Catlink 喂食器自动化控制"""
+    """Catlink喂食器自动化（模拟器版）"""
     
-    def __init__(self, ocr_detector, click_simulator, target_size: Tuple[int, int] = (720, 1280)):
+    def __init__(self, ocr_engine, device_config=None):
         """初始化
         
         Args:
-            ocr_detector: OCR检测器实例
-            click_simulator: 点击模拟器实例
-            target_size: 目标分辨率 (暂不用于 PostMessage 强制缩放，除非需要)
+            ocr_engine: OCR检测器实例
+            device_config: 设备配置字典，包含模拟器路径和ADB端口等
         """
-        self.ocr = ocr_detector
-        self.clicker = click_simulator
-        self.target_size = target_size
+        self.ocr = ocr_engine
+        self.clicker = ClickSimulator()
+        self.device_config = device_config or {}
+        self.target_size = (720, 1280)
         self.target_portions = 3
         
+        # 准备ADB配置
+        self.adb_config = {
+            'emulator_path': self.device_config.get('emulator_path', ''),
+            'adb_port': self.device_config.get('adb_port', 16384)
+        }
+        
     def _click_scaled(self, hwnd: int, x: int, y: int, actual_width: int, actual_height: int, delay: float = 0.5):
-        """点击坐标 (针对 PostMessage 优化)
+        """点击坐标 (支持ADB坐标缩放)
         
-        注意: PostMessage 通常使用窗口客户端坐标。
-        如果截图也是来自 WindowCapture (基于 PrintWindow/BitBlt)，截图尺寸通常等于客户端尺寸。
-        此时不应强制缩放到 'target_size' (如 720x1280)，否则会导致坐标偏移。
-        除非截图是高DPI (2x) 而窗口坐标是 1x。
+        ADB点击时会自动将Windows窗口坐标缩放到模拟器内部分辨率。
+        例如：窗口444x830 → 模拟器720x1280
         """
-        # 暂时禁用强制缩放到 target_size，因为观察到用户窗口只有 480x815，缩放到 720 会偏离
-        # 如果需要处理 DPI 缩放，应该比较 actual_width 和 窗口实际 client_width
+        # 准备包含窗口尺寸的ADB配置
+        adb_config_with_size = self.adb_config.copy()
+        adb_config_with_size['window_width'] = actual_width
+        adb_config_with_size['window_height'] = actual_height
+        adb_config_with_size['target_width'] = self.device_config.get('target_width', 720)
+        adb_config_with_size['target_height'] = self.device_config.get('target_height', 1280)
         
-        target_x = x
-        target_y = y
-        
-        # 简单的 DPI 处理逻辑: 如果截图非常大 (>2000)，可能是 2k/4k 屏，可能需要缩小
-        # 但目前日志显示 Actual 480x815，这是逻辑像素，直接点击即可
-        
-        logger.info(f"点击坐标: ({x}, {y}) [Window Size: {actual_width}x{actual_height}]")
-        self.clicker.click_at_position(hwnd, target_x, target_y, delay=delay)
+        logger.info(f"点击坐标: ({x}, {y}) [Window: {actual_width}x{actual_height}]")
+        self.clicker.click_at_position(hwnd, x, y, delay=delay, adb_config=adb_config_with_size)
     
     def feed(self, hwnd: int, capture_func) -> bool:
         """执行Catlink喂食流程
@@ -91,12 +95,14 @@ class CatlinkAutomation:
         pos = self.ocr.find_text(screenshot, "One-标准版", fuzzy=True)
         if pos:
             logger.info(f"✓ 确认在 One-标准版 页面 (坐标: {pos})")
+            # 已确认在One-标准版页面
             return True
         
         # 也可以检查是否有手动出粮
         manual_pos = self.ocr.find_text(screenshot, "手动出粮", fuzzy=True)
         if manual_pos:
              logger.info(f"✓ 找到 '手动出粮' (坐标: {manual_pos})，确认为操作页面")
+             # 找到手动出粮，确认为操作页面
              return True
         
         # 打印当前所有文字
@@ -106,46 +112,61 @@ class CatlinkAutomation:
         return False
         
     def _click_manual_feed(self, hwnd, capture_func) -> bool:
-        """点击手动出粮按钮"""
+        """点击手动出粮按钮 (优先使用图片匹配)"""
         logger.info("查找 '手动出粮'...")
         screenshot = capture_func()
         
-        # 优化：通常在底部，裁剪下半部分进行识别，提高速度
-        h, w = screenshot.shape[:2]
-        roi_y = int(h * 0.4)
-        roi = screenshot[roi_y:, :]
+        # --- 方案A: 图片匹配 (优先) ---
+        # 模板路径: src/resources/templates/catlink/BTN-shoudongchuliang.png
+        # 注意：运行时路径可能需要根据 CWD 调整，这里假设 CWD 是项目根目录
+        template_path = os.path.join("src", "resources", "templates", "catlink", "BTN-shoudongchuliang.png")
         
-        pos = self.ocr.find_text(roi, "手动出粮", fuzzy=True)
+        # 转换 screenshot (PIL Image) 到 cv2 格式 (numpy)
+        # capture_func 返回的是 numpy array (OpenCV格式) 还是 PIL? 
+        # 查看 window_capture.py -> capture() 返回 QPixmap ? 
+        # 等等，window_capture.py 返回的是 QPixmap。
+        # 但是 simulator_driver.py 的 capture_window 可能做了转换。
+        # 让我们检查一下传入的 screenshot 是什么类型。
+        # 在 feeder_automation.py 中 screenshot.shape 被使用，说明是 numpy array (cv2 format).
+        # 是的，SimulatorDriver.capture_window 返回 cv2 image.
+        
+        from src.utils.image_utils import ImageMatcher
+        
+        h, w = screenshot.shape[:2]
+        
+        # 为了加快速度，还是可以切 ROI，或者直接全屏找（图片匹配通常很快）
+        # 既然用户担心按钮位置变动，我们先尝试全屏找，如果太慢再优化
+        pos = ImageMatcher.find_image(screenshot, template_path, threshold=0.8)
+        
         if pos:
-            # 还原坐标
-            real_x = pos[0]
-            real_y = pos[1] + roi_y
+            real_x, real_y = pos
+            msg = f"✓ [图片匹配] 找到 '手动出粮', 坐标: ({real_x}, {real_y})"
+            logger.info(msg)
             
-            logger.info(f"✓ 找到 '手动出粮' (ROI), 原始坐标: {pos}, 全局坐标: ({real_x}, {real_y})")
-            logger.info(f"  准备点击: ({real_x}, {real_y}) of {w}x{h}")
-            
-            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.8) # 减少延迟
+            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.3)
             return True
             
-        logger.warning(f"ROI区域 (y={roi_y}~{h}) 未找到 '手动出粮'，尝试全屏搜索...")
+        logger.warning("图片匹配未找到，尝试OCR兜底...")
         
-        # 尝试全屏搜索
+        # --- 方案B: OCR 兜底 (全屏) ---
+        # 虽然用户说文字识别不行，但作为最后一道防线还是留着吧
         pos = self.ocr.find_text(screenshot, "手动出粮", fuzzy=True)
         if pos:
-            logger.info(f"✓ 找到 '手动出粮' (全屏), 坐标: {pos}")
-            self._click_scaled(hwnd, pos[0], pos[1], w, h, delay=0.8)
+            msg = f"✓ [OCR兜底] 找到 '手动出粮', 坐标: {pos}"
+            logger.info(msg)
+            self._click_scaled(hwnd, pos[0], pos[1], w, h, delay=0.3)
             return True
             
         # 打印所有识别到的文字，帮助调试
         all_text = self.ocr.get_all_text(screenshot)
         texts = [t[0] for t in all_text]
-        logger.error(f"✗ 未找到 '手动出粮' 按钮。当前页面识别到的文字: {texts}")
+        logger.error(f"✗ 未找到 '手动出粮' 按钮 (图片+OCR均失败)。当前文字: {texts}")
         return False
         
     def _adjust_portions_and_confirm(self, hwnd, capture_func) -> bool:
         """调整份数并确认"""
         logger.info("等待出粮弹窗...")
-        time.sleep(1.0) # 减少等待
+        time.sleep(0.8)  # 等待弹窗加载
         
         max_attempts = 8
         for i in range(max_attempts):
@@ -187,7 +208,7 @@ class CatlinkAutomation:
                 if not self._click_minus(hwnd, capture_func, roi_info=(roi_y1, roi)):
                     return False
             
-            time.sleep(0.3) 
+            time.sleep(0.2)
             
         logger.error("调整份数超时")
         return False
@@ -241,7 +262,9 @@ class CatlinkAutomation:
         return None
 
     def _click_plus(self, hwnd, capture_func, roi_info=None) -> bool:
-        """点击加号"""
+        """点击加号（使用图片匹配）"""
+        from src.utils.image_utils import ImageMatcher
+        
         # 使用传入的 ROI 避免重新截图
         if roi_info:
             offset_y, img = roi_info
@@ -251,64 +274,47 @@ class CatlinkAutomation:
             offset_y = 0
             img = screenshot
             
-        pos = self.ocr.find_text(img, "+", fuzzy=True)
-        if not pos:
-             pos = self.ocr.find_text(img, "＋", fuzzy=True)
-             
+        template_path = os.path.join("src", "resources", "templates", "catlink", "BTN-plus.png")
+        pos = ImageMatcher.find_image(img, template_path, threshold=0.7)
+        
         if pos:
-            # 还原坐标
             real_x = pos[0]
             real_y = pos[1] + offset_y
-            # 为了获取全屏尺寸，我们需要 capture_func 或者保存
-            # 优化：_click_scaled 不需要 actual_size 除非我们做 scaling. 
-            # 既然我们禁用了 scaling，传 0,0 也行，但为了日志好看，我们重构下
-            
-            self._click_scaled(hwnd, real_x, real_y, 0, 0, delay=0.2)
+            h, w = img.shape[:2] if not roi_info else capture_func().shape[:2]
+            logger.info(f"✓ [图片匹配] 找到加号按钮: ({real_x}, {real_y})")
+            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.2)
             return True
-            
-        # 找不到 + 号，使用 Blind Click (基于数字位置右侧)
-        # 获取数字位置
-        curr = self._get_current_portions(img)
-        if curr:
-            _, (nx, ny) = curr
-            # 假设 + 号在数字右侧 100 像素 (需要适配分辨率?)
-            # 480 宽度的屏幕，100 像素很大。可能 60-80 够了
-            offset = 80 
-            target_x = nx + offset
-            target_y = ny + offset_y
-            self._click_scaled(hwnd, target_x, target_y, 0, 0, delay=0.2)
-            return True
-            
-        return False
+        else:
+            logger.warning("未找到加号按钮（图片匹配）")
+            return False
+
 
     def _click_minus(self, hwnd, capture_func, roi_info=None) -> bool:
+        """点击减号（使用图片匹配）"""
+        from src.utils.image_utils import ImageMatcher
+        
+        # 使用传入的 ROI 避免重新截图
         if roi_info:
             offset_y, img = roi_info
         else:
             screenshot = capture_func()
+            h, w = screenshot.shape[:2]
             offset_y = 0
             img = screenshot
+            
+        template_path = os.path.join("src", "resources", "templates", "catlink", "BTN-minus.png")
+        pos = ImageMatcher.find_image(img, template_path, threshold=0.7)
         
-        pos = self.ocr.find_text(img, "-", fuzzy=True)
-        if not pos:
-             pos = self.ocr.find_text(img, "－", fuzzy=True)
-             
         if pos:
             real_x = pos[0]
             real_y = pos[1] + offset_y
-            self._click_scaled(hwnd, real_x, real_y, 0, 0, delay=0.2)
+            h, w = img.shape[:2] if not roi_info else capture_func().shape[:2]
+            logger.info(f"✓ [图片匹配] 找到减号按钮: ({real_x}, {real_y})")
+            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.2)
             return True
-            
-        curr = self._get_current_portions(img)
-        if curr:
-            _, (nx, ny) = curr
-            offset = 80
-            target_x = nx - offset
-            target_y = ny + offset_y
-            self._click_scaled(hwnd, target_x, target_y, 0, 0, delay=0.2)
-            return True
-            
-        return False
+        else:
+            logger.warning("未找到减号按钮（图片匹配）")
+            return False
         
     def _click_feed_now(self, hwnd, capture_func) -> bool:
         """点击立即出粮"""
@@ -323,7 +329,7 @@ class CatlinkAutomation:
         if pos:
             real_x = pos[0]
             real_y = pos[1] + roi_y
-            self._click_scaled(hwnd, real_x, real_y, w, h, delay=1.0)
+            self._click_scaled(hwnd, real_x, real_y, w, h, delay=0.5)
             return True
         logger.error("未找到 '立即出粮'")
         return False
